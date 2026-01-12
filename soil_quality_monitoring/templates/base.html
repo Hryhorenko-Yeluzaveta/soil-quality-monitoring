@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>
+        {% block title %}
+        	Base page Title
+        {% endblock %}
+    </title>
+</head>
+<body>
+    {% include 'components/header.html'%}
+
+    {% block body %}
+    	<h1>Base page body</h1>
+    {% endblock %}
+</body>
+</html>
