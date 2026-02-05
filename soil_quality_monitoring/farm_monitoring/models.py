@@ -3,6 +3,7 @@ from django.db import models
 
 class Crop(models.Model):
     name = models.CharField(max_length=50, verbose_name="Назва культури")
+    image = models.ImageField(blank=True, upload_to="crops", verbose_name="Зображення")
     min_humidity = models.FloatField(
         verbose_name="Мін. вологість",
         help_text="в %",
