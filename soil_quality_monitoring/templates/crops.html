@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Список культур | SmartFarm{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <h1>Культури</h1>
+    <a href="#" class="btn-primary">
+        <i class="ri-add-line"></i>
+        <span>Додати культуру</span>
+    </a>
+</div>
+
+<div class="filter-section">
+    <div class="filter-scroll">
+        <a href="#" class="filter-pill active">Всі</a>
+        <a href="#" class="filter-pill">Ягоди</a>
+        <a href="#" class="filter-pill">Фрукти</a>
+        <a href="#" class="filter-pill">Зернові</a>
+        <a href="#" class="filter-pill">Овочі</a>
+        <a href="#" class="filter-pill">Кормові</a>
+    </div>
+</div>
+
+<div class="crops-grid">
+
+    <article class="crop-card">
+        <div class="crop-image">
+            <img src="https://images.unsplash.com/photo-1518635017498-87f514b751ba?q=80&w=600&auto=format&fit=crop" alt="Клубника">
+            <div class="crop-badge">Ягоди</div>
+        </div>
+
+        <div class="crop-content">
+            <h2 class="crop-title">Полуниця</h2>
+
+            <div class="crop-stats">
+                <div class="stat-item">
+                    <div class="stat-icon"><i class="ri-drop-line"></i></div>
+                    <div class="stat-info">
+                        <span class="label">Вологість</span>
+                        <span class="value">60% - 80%</span>
+                    </div>
+                </div>
+
+                <div class="stat-item">
+                    <div class="stat-icon"><i class="ri-temp-hot-line"></i></div>
+                    <div class="stat-info">
+                        <span class="label">Температура</span>
+                        <span class="value">18°C - 25°C</span>
+                    </div>
+                </div>
+
+                <div class="stat-item">
+                    <div class="stat-icon"><i class="ri-flask-line"></i></div>
+                    <div class="stat-info">
+                        <span class="label">Кислотність (pH)</span>
+                        <span class="value">5.5 - 6.5</span>
+                    </div>
+                </div>
+
+                <div class="stat-item">
+                    <div class="stat-icon"><i class="ri-seedling-line"></i></div>
+                    <div class="stat-info">
+                        <span class="label">Азот (N)</span>
+                        <span class="value">40 - 60 мг/кг</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="crop-actions">
+            <button class="btn-icon edit" title="Редагувати">
+                <i class="ri-pencil-line"></i>
+            </button>
+            <button class="btn-icon delete" title="Видалити">
+                <i class="ri-delete-bin-line"></i>
+            </button>
+        </div>
+    </article>
+
+    <article class="crop-card">
+        <div class="crop-image">
+            <img src="https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?q=80&w=600&auto=format&fit=crop" alt="Пшеница">
+            <div class="crop-badge">Зернові</div>
+        </div>
+
+        <div class="crop-content">
+            <h2 class="crop-title">Пшениця</h2>
+
+            <div class="crop-stats">
+                <div class="stat-item">
+                    <div class="stat-icon"><i class="ri-drop-line"></i></div>
+                    <div class="stat-info">
+                        <span class="label">Вологість</span>
+                        <span class="value">40% - 60%</span>
+                    </div>
+                </div>
+
+                <div class="stat-item">
+                    <div class="stat-icon"><i class="ri-temp-hot-line"></i></div>
+                    <div class="stat-info">
+                        <span class="label">Температура</span>
+                        <span class="value">10°C - 20°C</span>
+                    </div>
+                </div>
+
+                <div class="stat-item">
+                    <div class="stat-icon"><i class="ri-flask-line"></i></div>
+                    <div class="stat-info">
+                        <span class="label">Кислотність (pH)</span>
+                        <span class="value">6.0 - 7.0</span>
+                    </div>
+                </div>
+
+                <div class="stat-item">
+                    <div class="stat-icon"><i class="ri-seedling-line"></i></div>
+                    <div class="stat-info">
+                        <span class="label">Азот (N)</span>
+                        <span class="value">80 - 120 мг/кг</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="crop-actions">
+            <button class="btn-icon edit"><i class="ri-pencil-line"></i></button>
+            <button class="btn-icon delete"><i class="ri-delete-bin-line"></i></button>
+        </div>
+    </article>
+
+</div>
+
+{% include 'components/pagination.html' %}
+
+{% endblock %}
