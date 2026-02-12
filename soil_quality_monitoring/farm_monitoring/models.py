@@ -3,11 +3,11 @@ from django.db import models
 
 class Crop(models.Model):
     TYPE_CHOICES = [
-        ('Berries', 'Ягоди'),
-        ('Fruits', 'Фруктові'),
-        ('Cereals', 'Зернові'),
-        ('Vegetables', 'Овочеві'),
-        ('Forage', 'Кормові')
+        ('Ягоди', 'Ягоди'),
+        ('Фрукти', 'Фрукти'),
+        ('Зернові', 'Зернові'),
+        ('Овочі', 'Овочі'),
+        ('Кормові', 'Кормові')
     ]
     category = models.CharField(choices=TYPE_CHOICES, max_length=20, default='Vegetables', verbose_name="Категорія")
     name = models.CharField(max_length=50, verbose_name="Назва культури")
@@ -39,12 +39,12 @@ class Crop(models.Model):
         validators=[MinValueValidator(0.0), MaxValueValidator(14.0)]
     )
     min_nitrogen = models.FloatField(
-        verbose_name="Мін. вміст азоту",
+        verbose_name="Мін. вміст нітратів",
         help_text="мг/кг",
         validators = [MinValueValidator(0.0)]
     )
     max_nitrogen = models.FloatField(
-        verbose_name="Макс. вміст азоту",
+        verbose_name="Макс. вміст нітратів",
         help_text="мг/кг",
         validators = [MinValueValidator(0.0)]
     )

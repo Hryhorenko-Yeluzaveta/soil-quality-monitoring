@@ -4,13 +4,15 @@ from django.contrib import admin
 from django.urls import path, include
 from django.views.generic import TemplateView
 
-from farm_monitoring import views
+from farm_monitoring.views import crops, api
 
 urlpatterns = [
     path('', TemplateView.as_view(template_name='index.html')),
-    path('crops/', TemplateView.as_view(template_name='crops.html')),
-    path('api/sensors', views.get_active_sensors, name='get_sensors'),
-    path('api/measurement', views.add_measurement, name='api_add_measurement'),
+    # Crops urls
+    path('crops/', crops.CropListView.as_view()),
+    # Measurements urls
+    path('api/sensors', api.get_active_sensors, name='get_sensors'),
+    path('api/measurement', api.add_measurement, name='api_add_measurement'),
     path('admin/', admin.site.urls),
 ]
 

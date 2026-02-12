@@ -15,7 +15,7 @@
     <nav class="sidebar-nav">
         <ul>
             <li>
-                <a href="#" class="nav-link active">
+                <a href="#" class="nav-link">
                     <i class="ri-dashboard-line"></i>
                     <span>Дашборд</span>
                 </a>
@@ -33,7 +33,7 @@
                 </a>
             </li>
             <li>
-                <a href="/crops" class="nav-link">
+                <a href="/crops" class="nav-link {% if '/crops' in request.path %}active{% endif %}">
                     <i class="ri-seedling-line"></i>
                     <span>Культуры</span>
                 </a>
