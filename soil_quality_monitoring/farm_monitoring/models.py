@@ -9,18 +9,20 @@ class Crop(models.Model):
         ('Овочі', 'Овочі'),
         ('Кормові', 'Кормові')
     ]
-    category = models.CharField(choices=TYPE_CHOICES, max_length=20, default='Vegetables', verbose_name="Категорія")
+    category = models.CharField(choices=TYPE_CHOICES, max_length=50, default='Овочі', verbose_name="Категорія")
     name = models.CharField(max_length=50, verbose_name="Назва культури")
     image = models.ImageField(blank=True, upload_to="crops", verbose_name="Зображення")
     min_humidity = models.FloatField(
         verbose_name="Мін. вологість",
         help_text="в %",
-        validators=[MinValueValidator(0.0), MaxValueValidator(100.0)]
+        validators=[MinValueValidator(0.0, message="Не може бути менше 0."),
+                    MaxValueValidator(100.0, message="Не може бути більше 100.")]
     )
     max_humidity = models.FloatField(
         verbose_name="Макс. вологість",
         help_text="в %",
-        validators=[MinValueValidator(0.0), MaxValueValidator(100.0)]
+        validators=[MinValueValidator(0.0, message="Не може бути менше 0."),
+                    MaxValueValidator(100.0, message="Не може бути більше 100.")]
     )
     min_temperature = models.FloatField(
         verbose_name="Мін. температура",
@@ -32,21 +34,23 @@ class Crop(models.Model):
     )
     min_ph = models.FloatField(
         verbose_name="Мін. pH",
-        validators=[MinValueValidator(0.0), MaxValueValidator(14.0)]
+        validators=[MinValueValidator(0.0, message="Не може бути менше 0."),
+                    MaxValueValidator(14.0, message="pH не може бути більше 14.")]
     )
     max_ph = models.FloatField(
         verbose_name="Макс. pH",
-        validators=[MinValueValidator(0.0), MaxValueValidator(14.0)]
+        validators=[MinValueValidator(0.0, message="Не може бути менше 0."),
+                    MaxValueValidator(14.0, message="pH не може бути більше 14.")]
     )
     min_nitrogen = models.FloatField(
         verbose_name="Мін. вміст нітратів",
         help_text="мг/кг",
-        validators = [MinValueValidator(0.0)]
+        validators = [MinValueValidator(0.0, message="Не може бути менше 0.")]
     )
     max_nitrogen = models.FloatField(
         verbose_name="Макс. вміст нітратів",
         help_text="мг/кг",
-        validators = [MinValueValidator(0.0)]
+        validators = [MinValueValidator(0.0, message="Не може бути менше 0.")]
     )
 
     def __str__(self):

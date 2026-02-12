@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Додати культуру | SmartFarm{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <div class="header-title">
+        <a href="/crops" class="back-link"><i class="ri-arrow-left-line"></i></a>
+        <h1>Додати нову культуру</h1>
+    </div>
+</div>
+
+<div class="form-container">
+    <form method="post" enctype="multipart/form-data" class="crop-form" novalidate>
+        {% csrf_token %}
+
+        <div class="form-section-primary">
+
+            <div class="image-upload-wrapper">
+                <label for="id_image" class="image-upload-box">
+                    <div class="upload-icon"><i class="ri-image-add-line"></i></div>
+                    <span class="upload-text">Завантажити фото</span>
+                    <span class="upload-hint">JPG, PNG до 5MB</span>
+                    {{ form.image }}
+                </label>
+                {% for error in form.image.errors %}
+                    <div class="error-message">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="main-info-inputs">
+                <div class="form-group">
+                    <label for="{{ form.name.id_for_label }}">Назва культури</label>
+                    {{ form.name }}
+                    {% for error in form.name.errors %}
+                        <div class="error-message">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.category.id_for_label }}">Категорія</label>
+                    <div class="select-wrapper">
+                        {{ form.category }}
+                        <i class="ri-arrow-down-s-line select-arrow"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="section-title">Параметри вирощування</h3>
+
+        <div class="params-grid">
+
+            <div class="param-card">
+                <div class="param-header">
+                    <i class="ri-temp-hot-line icon"></i>
+                    <span>Температура (°C)</span>
+                </div>
+                <div class="range-inputs">
+                    <div class="input-col">
+                        <label>Мін.</label>
+                        {{ form.min_temperature }}
+                        {% for error in form.min_temperature.errors %}
+                            <div class="error-message">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="separator">-</div>
+                    <div class="input-col">
+                        <label>Макс.</label>
+                        {{ form.max_temperature }}
+                        {% for error in form.max_temperature.errors %}
+                            <div class="error-message">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="param-card">
+                <div class="param-header">
+                    <i class="ri-drop-line icon"></i>
+                    <span>Вологість (%)</span>
+                </div>
+                <div class="range-inputs">
+                    <div class="input-col">
+                        <label>Мін.</label>
+                        {{ form.min_humidity }}
+                        {% for error in form.min_humidity.errors %}
+                            <div class="error-message">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="separator">-</div>
+                    <div class="input-col">
+                        <label>Макс.</label>
+                        {{ form.max_humidity }}
+                        {% for error in form.max_humidity.errors %}
+                            <div class="error-message">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="param-card">
+                <div class="param-header">
+                    <i class="ri-flask-line icon"></i>
+                    <span>Кислотність (pH)</span>
+                </div>
+                <div class="range-inputs">
+                    <div class="input-col">
+                        <label>Мін.</label>
+                        {{ form.min_ph }}
+                        {% for error in form.min_ph.errors %}
+                            <div class="error-message">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="separator">-</div>
+                    <div class="input-col">
+                        <label>Макс.</label>
+                        {{ form.max_ph }}
+                        {% for error in form.max_ph.errors %}
+                            <div class="error-message">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="param-card">
+                <div class="param-header">
+                    <i class="ri-seedling-line icon"></i>
+                    <span>Азот (мг/кг)</span>
+                </div>
+                <div class="range-inputs">
+                    <div class="input-col">
+                        <label>Мін.</label>
+                        {{ form.min_nitrogen }}
+                        {% for error in form.min_nitrogen.errors %}
+                            <div class="error-message">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="separator">-</div>
+                    <div class="input-col">
+                        <label>Макс.</label>
+                        {{ form.max_nitrogen }}
+                        {% for error in form.max_nitrogen.errors %}
+                            <div class="error-message">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="form-actions">
+            <a href="/crops" class="btn-secondary">Скасувати</a>
+            <button type="submit" class="btn-submit">Зберегти культуру</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
