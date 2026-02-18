@@ -3,7 +3,7 @@ from django import forms
 from .models import Crop
 
 
-class CropForm(forms.ModelForm):
+class CropCreateForm(forms.ModelForm):
     def clean_name(self):
         name = self.cleaned_data.get('name')
         qs = Crop.objects.filter(name__iexact=name)
@@ -76,3 +76,7 @@ class CropForm(forms.ModelForm):
 
         for field in numeric_fields:
             error_messages[field] = common_errors
+
+class CropUpdateForm(forms.ModelForm):
+    class Meta(CropCreateForm.Meta):
+        pass
