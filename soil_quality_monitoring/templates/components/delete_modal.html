@@ -1,0 +1,48 @@
+<div id="universalDeleteModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="modal-icon">
+                <i class="ri-alarm-warning-line"></i>
+            </div>
+            <h3>Підтвердження видалення</h3>
+        </div>
+
+        <p>Ви впевнені, що хочете видалити об'єкт <strong id="modalItemName"></strong>?</p>
+
+        <form id="universalDeleteForm" method="post" action="">
+            {% csrf_token %}
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" onclick="closeDeleteModal()">Скасувати</button>
+                <button type="submit" class="btn-confirm-delete">Видалити</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    /**
+     * Відкриває модальне вікно для видалення.
+     * @param {string} deleteUrl - Повний URL для видалення
+     * @param {string} itemName - Назва видаленого обʼєкту (для відображення)
+     */
+    function openDeleteModal(deleteUrl, itemName) {
+        const modal = document.getElementById('universalDeleteModal');
+        const form = document.getElementById('universalDeleteForm');
+        const nameSpan = document.getElementById('modalItemName');
+        form.action = deleteUrl;
+        nameSpan.textContent = `"${itemName}"`;
+        modal.classList.add('active');
+    }
+
+    function closeDeleteModal() {
+        const modal = document.getElementById('universalDeleteModal');
+        modal.classList.remove('active');
+    }
+
+    window.addEventListener('click', function(event) {
+        const modal = document.getElementById('universalDeleteModal');
+        if (event.target === modal) {
+            closeDeleteModal();
+        }
+    });
+</script>

@@ -12,6 +12,7 @@ class Crop(models.Model):
     category = models.CharField(choices=TYPE_CHOICES, max_length=50, default='Овочі', verbose_name="Категорія")
     name = models.CharField(max_length=50, verbose_name="Назва культури")
     image = models.ImageField(blank=True, upload_to="crops", verbose_name="Зображення")
+    archived = models.BooleanField(default=False, verbose_name="Заархівовано")
     min_humidity = models.FloatField(
         verbose_name="Мін. вологість",
         help_text="в %",

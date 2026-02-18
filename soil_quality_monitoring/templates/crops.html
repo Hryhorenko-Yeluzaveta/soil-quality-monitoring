@@ -4,87 +4,92 @@
 {% block title %}Список культур | SmartFarm{% endblock %}
 
 {% block body %}
-<div class="page-header">
-    <h1>Культури</h1>
-    <a href="/crops/create" class="btn-primary">
-        <i class="ri-add-line"></i>
-        <span>Додати культуру</span>
-    </a>
-</div>
-
-<div class="filter-section">
-    <div class="filter-scroll">
-        <a href="#" class="filter-pill active">Всі</a>
-        <a href="#" class="filter-pill">Ягоди</a>
-        <a href="#" class="filter-pill">Фрукти</a>
-        <a href="#" class="filter-pill">Зернові</a>
-        <a href="#" class="filter-pill">Овочі</a>
-        <a href="#" class="filter-pill">Кормові</a>
+    <div class="page-header">
+        <h1>Культури</h1>
+        <a href="/crops/create" class="btn-primary">
+            <i class="ri-add-line"></i>
+            <span>Додати культуру</span>
+        </a>
     </div>
-</div>
 
-<div class="crops-grid">
-{% if crops %}
-    {% for crop in crops %}
-    <article class="crop-card">
-        <div class="crop-image">
-            <img src="/media/{{ crop.image }}" alt="Полуниця">
-            <div class="crop-badge">{{ crop.category }}</div>
+    <div class="filter-section">
+        <div class="filter-scroll">
+            <a href="#" class="filter-pill active">Всі</a>
+            <a href="#" class="filter-pill">Ягоди</a>
+            <a href="#" class="filter-pill">Фрукти</a>
+            <a href="#" class="filter-pill">Зернові</a>
+            <a href="#" class="filter-pill">Овочі</a>
+            <a href="#" class="filter-pill">Кормові</a>
         </div>
+    </div>
 
-        <div class="crop-content">
-            <h2 class="crop-title">{{ crop.name }}</h2>
-
-            <div class="crop-stats">
-                <div class="stat-item">
-                    <div class="stat-icon"><i class="ri-drop-line"></i></div>
-                    <div class="stat-info">
-                        <span class="label">Вологість</span>
-                        <span class="value">{{ crop.min_humidity }}% - {{ crop.max_humidity }}%</span>
+    <div class="crops-grid">
+        {% if crops %}
+            {% for crop in crops %}
+                <article class="crop-card">
+                    <div class="crop-image">
+                        <img src="/media/{{ crop.image }}" alt="Полуниця">
+                        <div class="crop-badge">{{ crop.category }}</div>
                     </div>
-                </div>
 
-                <div class="stat-item">
-                    <div class="stat-icon"><i class="ri-temp-hot-line"></i></div>
-                    <div class="stat-info">
-                        <span class="label">Температура</span>
-                        <span class="value">{{ crop.min_temperature }}°C - {{ crop.max_temperature }}°C</span>
+                    <div class="crop-content">
+                        <h2 class="crop-title">{{ crop.name }}</h2>
+
+                        <div class="crop-stats">
+                            <div class="stat-item">
+                                <div class="stat-icon"><i class="ri-drop-line"></i></div>
+                                <div class="stat-info">
+                                    <span class="label">Вологість</span>
+                                    <span class="value">{{ crop.min_humidity }}% - {{ crop.max_humidity }}%</span>
+                                </div>
+                            </div>
+
+                            <div class="stat-item">
+                                <div class="stat-icon"><i class="ri-temp-hot-line"></i></div>
+                                <div class="stat-info">
+                                    <span class="label">Температура</span>
+                                    <span class="value">{{ crop.min_temperature }}°C - {{ crop.max_temperature }}°C</span>
+                                </div>
+                            </div>
+
+                            <div class="stat-item">
+                                <div class="stat-icon"><i class="ri-flask-line"></i></div>
+                                <div class="stat-info">
+                                    <span class="label">Кислотність (pH)</span>
+                                    <span class="value">{{ crop.min_ph }} - {{ crop.max_ph }}</span>
+                                </div>
+                            </div>
+
+                            <div class="stat-item">
+                                <div class="stat-icon"><i class="ri-seedling-line"></i></div>
+                                <div class="stat-info">
+                                    <span class="label">Вміст нітратів</span>
+                                    <span class="value">{{ crop.min_nitrogen }} мг/кг - {{ crop.max_nitrogen }} мг/кг</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
 
-                <div class="stat-item">
-                    <div class="stat-icon"><i class="ri-flask-line"></i></div>
-                    <div class="stat-info">
-                        <span class="label">Кислотність (pH)</span>
-                        <span class="value">{{ crop.min_ph }} - {{ crop.max_ph }}</span>
+                    <div class="crop-actions">
+                        <a class="btn-icon edit" href="{% url 'crop_update' crop.pk %}" title="Редагувати">
+                            <i class="ri-pencil-line"></i>
+                        </a>
+                        <button type="button"
+                                class="btn-icon delete"
+                                title="Видалити"
+                                onclick="openDeleteModal('{% url 'crop_delete' crop.pk %}', '{{ crop.name|escapejs }}')">
+                            <i class="ri-delete-bin-line"></i>
+                        </button>
                     </div>
-                </div>
+                </article>
+            {% endfor %}
+        {% else %}
+            <p>Культур поки що немає.</p>
+        {% endif %}
+    </div>
 
-                <div class="stat-item">
-                    <div class="stat-icon"><i class="ri-seedling-line"></i></div>
-                    <div class="stat-info">
-                        <span class="label">Вміст нітратів</span>
-                        <span class="value">{{ crop.min_nitrogen }} мг/кг - {{ crop.max_nitrogen }} мг/кг</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+    {% include 'components/pagination.html' %}
 
-        <div class="crop-actions">
-            <a class="btn-icon edit" href="/crops/update/{{ crop.pk }}" title="Редагувати">
-                <i class="ri-pencil-line"></i>
-            </a>
-            <button class="btn-icon delete" title="Видалити">
-                <i class="ri-delete-bin-line"></i>
-            </button>
-        </div>
-    </article>
-{% endfor %}
-    {% else %}
-    <p>Культур поки що немає.</p>
-{% endif %}
-</div>
-
-{% include 'components/pagination.html' %}
+    {% include 'components/delete_modal.html' %}
 
 {% endblock %}

@@ -12,6 +12,7 @@ urlpatterns = [
     path('crops/', crops.CropListView.as_view(), name='crops'),
     path('crops/create', crops.CropCreateView.as_view()),
     path('crops/update/<int:pk>', crops.CropUpdateView.as_view(), name='crop_update'),
+    path('crops/delete/<int:pk>', crops.CropDeleteView.as_view(), name='crop_delete'),
     # Measurements urls
     path('api/sensors', api.get_active_sensors, name='get_sensors'),
     path('api/measurement', api.add_measurement, name='api_add_measurement'),
