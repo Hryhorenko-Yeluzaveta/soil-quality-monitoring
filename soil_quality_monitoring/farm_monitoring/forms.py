@@ -6,7 +6,7 @@ from .models import Crop
 class CropCreateForm(forms.ModelForm):
     def clean_name(self):
         name = self.cleaned_data.get('name')
-        qs = Crop.objects.filter(name__iexact=name)
+        qs = Crop.objects.filter(name__iexact=name, archived=False)
         if self.instance.pk:
             qs = qs.exclude(pk=self.instance.pk)
 
