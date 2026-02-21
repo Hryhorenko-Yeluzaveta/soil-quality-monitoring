@@ -14,12 +14,10 @@
 
     <div class="filter-section">
         <div class="filter-scroll">
-            <a href="#" class="filter-pill active">Всі</a>
-            <a href="#" class="filter-pill">Ягоди</a>
-            <a href="#" class="filter-pill">Фрукти</a>
-            <a href="#" class="filter-pill">Зернові</a>
-            <a href="#" class="filter-pill">Овочі</a>
-            <a href="#" class="filter-pill">Кормові</a>
+        <a href="/crops/" class="filter-pill {% if selected_category == None %} active {% endif %}">Всі</a>
+            {% for code, name in categories %}
+                <a href="?category={{ code }}" class="filter-pill {% if selected_category == code %} active {% endif %}" id="{{ code }}">{{ name }}</a>
+            {% endfor %}
         </div>
     </div>
 
@@ -29,7 +27,7 @@
                 <article class="crop-card">
                     <div class="crop-image">
                         <img src="/media/{{ crop.image }}" alt="Полуниця">
-                        <div class="crop-badge">{{ crop.category }}</div>
+                        <div class="crop-badge">{{ crop.get_category_display }}</div>
                     </div>
 
                     <div class="crop-content">

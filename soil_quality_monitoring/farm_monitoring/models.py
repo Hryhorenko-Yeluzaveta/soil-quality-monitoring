@@ -2,14 +2,14 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
 class Crop(models.Model):
-    TYPE_CHOICES = [
-        ('Ягоди', 'Ягоди'),
-        ('Фрукти', 'Фрукти'),
-        ('Зернові', 'Зернові'),
-        ('Овочі', 'Овочі'),
-        ('Кормові', 'Кормові')
-    ]
-    category = models.CharField(choices=TYPE_CHOICES, max_length=50, default='Овочі', verbose_name="Категорія")
+    class Category(models.TextChoices):
+        BERRIES = 'Berries', 'Ягоди'
+        FRUITS = 'Fruits', 'Фрукти'
+        GRAINS = 'Grains', 'Зернові'
+        VEGETABLES = 'Vegetables', 'Овочі'
+        FORAGE = 'Forage', 'Кормові'
+
+    category = models.CharField(choices=Category.choices, max_length=50, default=Category.VEGETABLES, verbose_name="Категорія")
     name = models.CharField(max_length=50, verbose_name="Назва культури")
     image = models.ImageField(blank=True, upload_to="crops", verbose_name="Зображення")
     archived = models.BooleanField(default=False, verbose_name="Заархівовано")

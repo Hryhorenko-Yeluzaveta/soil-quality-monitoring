@@ -9,6 +9,17 @@ class CropListView(ListView):
     template_name = 'crops.html'
     queryset = Crop.objects.filter(archived=False)
     context_object_name = 'crops'
+    def get_queryset(self):
+        queryset = Crop.objects.filter(archived=False)
+        selected_category = self.request.GET.get('category', None)
+        if selected_category:
+            queryset = queryset.filter(category=selected_category)
+        return queryset
+    def get_context_data(self, **kwargs):
+        context = super(CropListView, self).get_context_data(**kwargs)
+        context['categories'] = Crop.Category.choices
+        context['selected_category'] = self.request.GET.get('category', None)
+        return context
 
 class CropCreateView(CreateView):
     template_name = 'crop_form.html'
