@@ -1,17 +1,37 @@
-<div class="pagination-container">
-    <nav class="pagination">
-        <a href="#" class="page-link prev disabled">
-            <i class="ri-arrow-left-s-line"></i>
-        </a>
+{% if page_obj.has_other_pages %}
+    <div class="pagination-container">
+        <nav class="pagination">
 
-        <a href="#" class="page-link active">1</a>
-        <a href="#" class="page-link">2</a>
-        <a href="#" class="page-link">3</a>
-        <span class="page-dots">...</span>
-        <a href="#" class="page-link">12</a>
+            {% if page_obj.has_previous %}
+                <a href="?{{ query_string }}&page={{ page_obj.previous_page_number }}" class="page-link prev">
+                    <i class="ri-arrow-left-s-line"></i>
+                </a>
+            {% else %}
+                <a href="#" class="page-link prev disabled">
+                    <i class="ri-arrow-left-s-line"></i>
+                </a>
+            {% endif %}
 
-        <a href="#" class="page-link next">
-            <i class="ri-arrow-right-s-line"></i>
-        </a>
-    </nav>
-</div>
+            {% for num in custom_page_range %}
+                {% if num == page_obj.paginator.ELLIPSIS %}
+                    <span class="page-dots">{{ num }}</span>
+                {% elif num == page_obj.number %}
+                    <a href="#" class="page-link active">{{ num }}</a>
+                {% else %}
+                    <a href="?{{ query_string }}&page={{ num }}" class="page-link">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <a href="?{{ query_string }}&page={{ page_obj.next_page_number }}" class="page-link next">
+                    <i class="ri-arrow-right-s-line"></i>
+                </a>
+            {% else %}
+                <a href="#" class="page-link next disabled">
+                    <i class="ri-arrow-right-s-line"></i>
+                </a>
+            {% endif %}
+
+        </nav>
+    </div>
+{% endif %}

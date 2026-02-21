@@ -7,6 +7,7 @@ from farm_monitoring.models import Crop
 
 class CropListView(ListView):
     template_name = 'crops.html'
+    paginate_by = 9
     queryset = Crop.objects.filter(archived=False)
     context_object_name = 'crops'
     def get_queryset(self):
@@ -19,6 +20,16 @@ class CropListView(ListView):
         context = super(CropListView, self).get_context_data(**kwargs)
         context['categories'] = Crop.Category.choices
         context['selected_category'] = self.request.GET.get('category', None)
+
+        query_params = self.request.GET.copy()
+        if 'page' in query_params:
+            del query_params['page']
+        context['query_string'] = query_params.urlencode()
+        page = context.get('page_obj')
+        if page:
+            context['custom_page_range'] = page.paginator.get_elided_page_range(
+                page.number, on_each_side=2, on_ends=1
+            )
         return context
 
 class CropCreateView(CreateView):

@@ -23,7 +23,7 @@
 
     <div class="crops-grid">
         {% if crops %}
-            {% for crop in crops %}
+            {% for crop in page_obj %}
                 <article class="crop-card">
                     <div class="crop-image">
                         <img src="/media/{{ crop.image }}" alt="Полуниця">
