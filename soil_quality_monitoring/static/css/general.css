@@ -1,0 +1,27 @@
+:root {
+    --bg-color: #D1D2D4;
+    --sidebar-bg: #616657;
+    --sidebar-hover: #909483;
+    --accent-pink: #C19386;
+    --accent-alert: #B25C40;
+    --text-light: #F0F0F0;
+    --text-muted: #D1D2D4;
+
+    --font-main: 'Manrope', sans-serif;
+    --sidebar-width: 260px;
+    --transition-speed: 0.3s;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-main), serif;
+    background-color: var(--bg-color);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+}

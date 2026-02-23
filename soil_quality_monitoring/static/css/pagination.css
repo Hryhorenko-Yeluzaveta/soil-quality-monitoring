@@ -1,0 +1,58 @@
+/* Пагінація */
+.pagination-container {
+  margin-top: 3rem;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  padding: 8px 12px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+}
+
+.page-link, .page-item {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #555;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.page-link:hover,
+a.page-item:hover {
+  background-color: #f5f5f5;
+  color: var(--sidebar-bg);
+}
+
+.page-link.active {
+  background-color: var(--sidebar-bg);
+  color: #fff;
+  cursor: default;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+}
+
+.page-link.disabled {
+  color: #d1d1d1;
+  pointer-events: none;
+  cursor: default;
+}
+
+.page-dots {
+  color: #999;
+  padding: 0 4px;
+  letter-spacing: 2px;
+}
