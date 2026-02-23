@@ -15,7 +15,13 @@ class CropListView(ListView):
         selected_category = self.request.GET.get('category', None)
         if selected_category:
             queryset = queryset.filter(category=selected_category)
+
+        search_query = self.request.GET.get('q', None)
+        if search_query:
+            queryset = queryset.filter(name__icontains=search_query)
+
         return queryset
+
     def get_context_data(self, **kwargs):
         context = super(CropListView, self).get_context_data(**kwargs)
         context['categories'] = Crop.Category.choices

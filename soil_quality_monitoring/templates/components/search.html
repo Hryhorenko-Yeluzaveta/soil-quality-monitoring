@@ -1,0 +1,46 @@
+<div class="search-wrapper">
+    <form id="search-form" method="get" action="">
+        {% if request.GET.category %}
+            <input type="hidden" name="category" value="{{ request.GET.category }}">
+        {% endif %}
+
+        <i class="ri-search-line search-icon"></i>
+
+        <input type="text"
+               id="search-input"
+               name="q"
+               value="{{ request.GET.q|default:'' }}"
+               placeholder="Пошук..."
+               class="search-input"
+               autocomplete="off">
+
+        {% if request.GET.q %}
+            <a href="?{% if request.GET.category %}category={{ request.GET.category }}{% endif %}" class="search-clear" title="Очистити">
+                <i class="ri-close-circle-fill"></i>
+            </a>
+        {% endif %}
+    </form>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const searchInput = document.getElementById('search-input');
+        const searchForm = document.getElementById('search-form');
+        let typingTimer;
+        const doneTypingInterval = 400;
+
+        if (searchInput && searchForm) {
+            searchInput.addEventListener('input', function() {
+                clearTimeout(typingTimer);
+
+                typingTimer = setTimeout(function() {
+                    searchForm.submit();
+                }, doneTypingInterval);
+            });
+            const val = searchInput.value;
+            searchInput.focus();
+            searchInput.value = '';
+            searchInput.value = val;
+        }
+    });
+</script>

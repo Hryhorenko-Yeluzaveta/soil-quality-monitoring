@@ -11,14 +11,21 @@
             <span>Додати культуру</span>
         </a>
     </div>
+    <div class="controls-row">
 
-    <div class="filter-section">
-        <div class="filter-scroll">
-        <a href="/crops/" class="filter-pill {% if selected_category == None %} active {% endif %}">Всі</a>
-            {% for code, name in categories %}
-                <a href="?category={{ code }}" class="filter-pill {% if selected_category == code %} active {% endif %}" id="{{ code }}">{{ name }}</a>
-            {% endfor %}
+        <div class="filter-section">
+            <div class="filter-scroll">
+                <a href="/crops/" class="filter-pill {% if selected_category == None %} active {% endif %}">Всі</a>
+                {% for code, name in categories %}
+                    <a href="?category={{ code }}"
+                       class="filter-pill {% if selected_category == code %} active {% endif %}"
+                       id="{{ code }}">{{ name }}</a>
+                {% endfor %}
+            </div>
         </div>
+
+        {% include 'components/search.html' %}
+
     </div>
 
     <div class="crops-grid">
