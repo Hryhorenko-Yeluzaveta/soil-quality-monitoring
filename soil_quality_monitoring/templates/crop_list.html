@@ -15,11 +15,12 @@
 
         <div class="filter-section">
             <div class="filter-scroll">
-                <a href="/crops/" class="filter-pill {% if selected_category == None %} active {% endif %}">Всі</a>
+                <a href="?{% if request.GET.q %}q={{ request.GET.q }}{% endif %}" class="filter-pill {% if selected_category == None %} active {% endif %}">Всі</a>
+
                 {% for code, name in categories %}
-                    <a href="?category={{ code }}"
-                       class="filter-pill {% if selected_category == code %} active {% endif %}"
-                       id="{{ code }}">{{ name }}</a>
+                    <a href="?category={{ code }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="filter-pill {% if selected_category == code %} active {% endif %}" id="{{ code }}">
+                        {{ name }}
+                    </a>
                 {% endfor %}
             </div>
         </div>
@@ -33,7 +34,7 @@
             {% for crop in page_obj %}
                 <article class="crop-card">
                     <div class="crop-image">
-                        <img src="/media/{{ crop.image }}" alt="Полуниця">
+                        <img src="/media/{{ crop.image }}" alt="{{ crop.name }}">
                         <div class="crop-badge">{{ crop.get_category_display }}</div>
                     </div>
 

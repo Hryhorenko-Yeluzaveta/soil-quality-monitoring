@@ -92,31 +92,38 @@ class Sector(models.Model):
         verbose_name_plural = "Ділянки"
 
 class Sensor(models.Model):
-    TYPE_CHOICES = [
-        ('TEMP', 'Температура'),
-        ('HUM', 'Вологість'),
-        ('PH', 'Кислотність'),
-        ('NIT', 'Азот')
-    ]
+    class Type(models.TextChoices):
+        TEMPERATURE = 'TEMP', 'Температура'
+        HUMIDITY = 'HUM', 'Вологість'
+        PH = 'PH', 'Кислотність'
+        NITRATES = ('NIT', 'Нітрати')
+
     type = models.CharField(
         max_length=5,
-        choices=TYPE_CHOICES
+        choices=Type.choices,
+        null=False,
+        blank=False,
+        verbose_name="Тип сенсора"
     )
     serial_number = models.CharField(
         max_length=20,
         unique=True,
-        help_text="Format: SF-type-number"
+        help_text="Format: SF-type-number",
+        verbose_name="Серійний номер сенсора"
     )
     offset_x = models.FloatField(
         help_text="у %",
-        validators=[MinValueValidator(0.0), MaxValueValidator(100.0)]
+        validators=[MinValueValidator(0.0), MaxValueValidator(100.0)],
+        verbose_name="Розташування за Х"
     )
     offset_y = models.FloatField(
         help_text="у %",
-        validators=[MinValueValidator(0.0), MaxValueValidator(100.0)]
+        validators=[MinValueValidator(0.0), MaxValueValidator(100.0)],
+        verbose_name="Розташування за Y"
     )
-    is_active = models.BooleanField(default=True)
-    sector = models.ForeignKey(Sector, on_delete=models.CASCADE, related_name="sensors")
+    is_active = models.BooleanField(default=True, verbose_name="Активований")
+    archived = models.BooleanField(default=False, verbose_name="Заархівовано")
+    sector = models.ForeignKey(Sector, on_delete=models.CASCADE, related_name="sensors", verbose_name="Сектор")
 
     def __str__(self):
         return self.serial_number

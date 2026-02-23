@@ -17,25 +17,19 @@
             <li>
                 <a href="#" class="nav-link">
                     <i class="ri-map-2-line"></i>
-                    <span>Карта фермы</span>
-                </a>
-            </li>
-            <li>
-                <a href="#" class="nav-link">
-                    <i class="ri-bar-chart-box-line"></i>
-                    <span>История</span>
+                    <span>Мапа ферми</span>
                 </a>
             </li>
             <li>
                 <a href="/crops" class="nav-link {% if '/crops' in request.path %}active{% endif %}">
                     <i class="ri-seedling-line"></i>
-                    <span>Культуры</span>
+                    <span>Культури</span>
                 </a>
             </li>
             <li>
-                <a href="#" class="nav-link">
-                    <i class="ri-sensor-line"></i>
-                    <span>Датчики</span>
+                <a href="/sensors" class="nav-link {% if '/sensors' in request.path %}active{% endif %}">
+                    <i class="ri-bar-chart-box-line"></i>
+                    <span>Сенсори</span>
                 </a>
             </li>
         </ul>
@@ -44,7 +38,7 @@
     <div class="sidebar-footer">
         <a href="#" class="nav-link logout">
             <i class="ri-logout-box-line"></i>
-            <span>Выйти</span>
+            <span>Вийти</span>
         </a>
     </div>
 </aside>

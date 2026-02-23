@@ -1,0 +1,141 @@
+/* Пошук */
+.controls-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-shrink: 0;
+}
+
+.controls-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 2rem;
+    flex-wrap: nowrap;
+}
+
+.search-wrapper {
+    position: relative;
+    min-width: 300px;
+    flex-shrink: 0;
+}
+
+.search-input {
+    width: 100%;
+    padding: 10px 40px;
+    border: 1px solid #d1d2d4;
+    border-radius: 50px;
+    font-size: 0.95rem;
+    color: #333;
+    background-color: #fff;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--accent-pink);
+    box-shadow: 0 0 0 3px rgba(193, 147, 134, 0.2);
+}
+
+.search-input::placeholder {
+    color: #999;
+}
+
+.search-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+    pointer-events: none;
+}
+
+.search-clear {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease;
+}
+
+.search-clear:hover {
+    color: var(--accent-alert);
+}
+
+/* Фільтрація */
+.filter-section {
+    margin-bottom: 0;
+    flex: 1;
+    min-width: 0;
+}
+
+.filter-scroll {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    overflow-x: auto;
+    padding-bottom: 0;
+    scrollbar-width: none;
+}
+
+.filter-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+.filter-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 50px;
+    color: #666;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.filter-pill:hover {
+    border-color: var(--sidebar-bg);
+    color: var(--sidebar-bg);
+    transform: translateY(-1px);
+}
+
+.filter-pill.active {
+    background-color: var(--sidebar-bg);
+    color: #fff;
+    border-color: var(--sidebar-bg);
+    box-shadow: 0 4px 12px rgba(97, 102, 87, 0.25);
+}
+
+@media (max-width: 768px) {
+    .controls-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+        margin-bottom: 1.5rem;
+    }
+
+    .controls-right {
+        width: 100%;
+        flex-wrap: nowrap;
+        gap: 12px;
+        margin-top: 0;
+    }
+
+    .search-wrapper {
+        flex: 1;
+        min-width: 0;
+        width: auto;
+    }
+}

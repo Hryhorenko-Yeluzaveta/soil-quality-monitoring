@@ -21,7 +21,7 @@ def add_measurement(request):
     return JsonResponse({"error": "Only POST allowed"}, status=405)
 
 def get_active_sensors(request):
-    sensors = Sensor.objects.filter(is_active=True)
+    sensors = Sensor.objects.filter(is_active=True, archived=False)
     if not sensors:
         return JsonResponse({"message": "There are no sensors yet"}, status=404)
     data = []

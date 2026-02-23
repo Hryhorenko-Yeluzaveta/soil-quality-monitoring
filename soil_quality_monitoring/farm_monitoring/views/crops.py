@@ -6,7 +6,7 @@ from farm_monitoring.forms import CropCreateForm, CropUpdateForm
 from farm_monitoring.models import Crop
 
 class CropListView(ListView):
-    template_name = 'crops.html'
+    template_name = 'crop_list.html'
     paginate_by = 9
     queryset = Crop.objects.filter(archived=False)
     context_object_name = 'crops'
@@ -39,7 +39,7 @@ class CropListView(ListView):
         return context
 
 class CropCreateView(CreateView):
-    template_name = 'crop_form.html'
+    template_name = 'crop_create_form.html'
     model = Crop
     form_class = CropCreateForm
     success_url = reverse_lazy("crops")

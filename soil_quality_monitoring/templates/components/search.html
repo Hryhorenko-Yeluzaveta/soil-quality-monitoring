@@ -1,8 +1,11 @@
 <div class="search-wrapper">
     <form id="search-form" method="get" action="">
-        {% if request.GET.category %}
-            <input type="hidden" name="category" value="{{ request.GET.category }}">
-        {% endif %}
+
+        {% for key, value in request.GET.items %}
+            {% if key != 'q' and key != 'page' %}
+                <input type="hidden" name="{{ key }}" value="{{ value }}">
+            {% endif %}
+        {% endfor %}
 
         <i class="ri-search-line search-icon"></i>
 
@@ -15,7 +18,7 @@
                autocomplete="off">
 
         {% if request.GET.q %}
-            <a href="?{% if request.GET.category %}category={{ request.GET.category }}{% endif %}" class="search-clear" title="Очистити">
+            <a href="?{% for key, value in request.GET.items %}{% if key != 'q' and key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}" class="search-clear" title="Очистити">
                 <i class="ri-close-circle-fill"></i>
             </a>
         {% endif %}
@@ -32,7 +35,6 @@
         if (searchInput && searchForm) {
             searchInput.addEventListener('input', function() {
                 clearTimeout(typingTimer);
-
                 typingTimer = setTimeout(function() {
                     searchForm.submit();
                 }, doneTypingInterval);

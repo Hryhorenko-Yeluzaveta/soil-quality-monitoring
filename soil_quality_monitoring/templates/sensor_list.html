@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Список сенсорів | SmartFarm{% endblock %}
+
+{% block body %}
+    <div class="page-header">
+        <h1>Сенсори</h1>
+        <a href="#" class="btn-primary">
+            <i class="ri-add-line"></i>
+            <span>Додати сенсор</span>
+        </a>
+    </div>
+
+    <div class="controls-row">
+        <div class="filter-section">
+            <div class="filter-scroll">
+                <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.active_only %}active_only={{ request.GET.active_only }}{% endif %}" class="filter-pill {% if not selected_type %}active{% endif %}">
+                    Всі
+                </a>
+
+                {% for type_code, type_name in types %}
+                    <a href="?type={{ type_code }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.active_only %}&active_only={{ request.GET.active_only }}{% endif %}" class="filter-pill {% if selected_type == type_code %}active{% endif %}">
+                        {{ type_name }}
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="controls-right">
+            <form method="get" style="display: inline-block; margin-right: 15px;">
+                {% if request.GET.type %}<input type="hidden" name="type" value="{{ request.GET.type }}">{% endif %}
+                {% if request.GET.q %}<input type="hidden" name="q" value="{{ request.GET.q }}">{% endif %}
+
+                <label class="toggle-checkbox">
+                    <input type="checkbox"
+                           name="active_only"
+                           value="true"
+                           onchange="this.form.submit()"
+                           {% if request.GET.active_only == 'true' %}checked{% endif %}>
+                    <span>Тільки активні</span>
+                </label>
+            </form>
+
+            {% include 'components/search.html' %}
+        </div>
+    </div>
+
+    <div class="sensors-list">
+        {% if sensors %}
+            {% for sensor in page_obj %}
+                <div class="sensor-row">
+                    <div class="sensor-icon">
+                        {% if sensor.type == 'TEMP' %}<i class="ri-temp-hot-line"></i>
+                        {% elif sensor.type == 'HUM' %}<i class="ri-drop-line"></i>
+                        {% elif sensor.type == 'PH' %}<i class="ri-flask-line"></i>
+                        {% elif sensor.type == 'NIT' %}<i class="ri-seedling-line"></i>
+                        {% else %}<i class="ri-sensor-line"></i>{% endif %}
+                    </div>
+
+                    <div class="sensor-info-group main-info">
+                        <span class="sensor-serial">{{ sensor.serial_number }}</span>
+                        <span class="sensor-type-label">{{ sensor.get_type_display }}</span>
+                    </div>
+
+                    <div class="sensor-info-group sector-info" title="Сектор">
+                        <i class="ri-map-pin-line"></i>
+                        <span>{{ sensor.sector }}</span>
+                    </div>
+
+                    <div class="sensor-info-group crop-info" title="Посіяна культура">
+                        <i class="ri-plant-line"></i>
+                        <span>{{ sensor.sector.crop.name|default:"Немає культури" }}</span>
+                    </div>
+
+                    <div class="sensor-info-group coords-info" title="Координати">
+                        <i class="ri-crosshair-2-line"></i>
+                        <span>X: {{ sensor.offset_x|floatformat:1 }}% | Y: {{ sensor.offset_y|floatformat:1 }}%</span>
+                    </div>
+
+                    <div class="sensor-info-group status-info">
+                        {% if sensor.is_active %}
+                            <span class="badge badge-active">Активний</span>
+                        {% else %}
+                            <span class="badge badge-inactive">Вимкнено</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="sensor-actions">
+                        <a class="btn-icon edit" href="#" title="Редагувати">
+                            <i class="ri-pencil-line"></i>
+                        </a>
+                        <button type="button"
+                                class="btn-icon delete"
+                                title="Видалити"
+                                onclick="openDeleteModal('#', '{{ sensor.serial_number|escapejs }}')">
+                            <i class="ri-delete-bin-line"></i>
+                        </button>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>Сенсорів поки що немає.</p>
+        {% endif %}
+    </div>
+
+    {% include 'components/pagination.html' %}
+    {% include 'components/delete_modal.html' %}
+
+{% endblock %}
