@@ -107,7 +107,6 @@ class Sensor(models.Model):
     )
     serial_number = models.CharField(
         max_length=20,
-        unique=True,
         help_text="Format: SF-type-number",
         verbose_name="Серійний номер сенсора"
     )
@@ -131,6 +130,13 @@ class Sensor(models.Model):
     class Meta:
         verbose_name = "Сенсор",
         verbose_name_plural = "Сенсори"
+        constraints = [
+            models.UniqueConstraint(
+                fields=['serial_number'],
+                condition=models.Q(archived=False),
+                name='unique_active_sensor_serial'
+            )
+        ]
 
 class Measurement(models.Model):
     sensor = models.ForeignKey(Sensor, on_delete=models.CASCADE, related_name="measurements")

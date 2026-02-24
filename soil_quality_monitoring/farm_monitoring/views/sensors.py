@@ -1,5 +1,6 @@
+from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
-from django.views.generic import ListView, CreateView, UpdateView
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from farm_monitoring.forms import SensorCreateForm, SensorUpdateForm
 
 from farm_monitoring.models import Sensor
@@ -10,6 +11,7 @@ class SensorListView(ListView):
     template_name = 'sensor_list.html'
     context_object_name = 'sensors'
     paginate_by = 10
+
     def get_queryset(self):
         queryset = Sensor.objects.filter(archived=False)
         selected_type = self.request.GET.get('type', None)
@@ -43,14 +45,27 @@ class SensorListView(ListView):
 
         return context
 
+
 class SensorCreateView(CreateView):
     template_name = 'sensor_create_update.html'
     model = Sensor
     form_class = SensorCreateForm
     success_url = reverse_lazy("sensors")
 
+
 class SensorUpdateView(UpdateView):
     template_name = 'sensor_create_update.html'
     queryset = Sensor.objects.filter(archived=False)
     form_class = SensorUpdateForm
     success_url = reverse_lazy("sensors")
+
+class SensorDeleteView(DeleteView):
+    model = Sensor
+    success_url = reverse_lazy("sensors")
+
+    def form_valid(self, form):
+        success_url = self.get_success_url()
+        self.object.archived = True
+        self.object.is_active = False
+        self.object.save()
+        return HttpResponseRedirect(success_url)

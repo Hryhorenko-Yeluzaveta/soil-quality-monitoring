@@ -93,7 +93,7 @@
                         <button type="button"
                                 class="btn-icon delete"
                                 title="Видалити"
-                                onclick="openDeleteModal('#', '{{ sensor.serial_number|escapejs }}')">
+                                onclick="openDeleteModal('{% url 'sensor_delete' sensor.pk %}', '{{ sensor.serial_number|escapejs }}')">
                             <i class="ri-delete-bin-line"></i>
                         </button>
                     </div>
