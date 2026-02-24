@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Crop
+from .models import Crop, Sensor
 
 
 class CropCreateForm(forms.ModelForm):
@@ -77,6 +77,87 @@ class CropCreateForm(forms.ModelForm):
         for field in numeric_fields:
             error_messages[field] = common_errors
 
+
 class CropUpdateForm(forms.ModelForm):
     class Meta(CropCreateForm.Meta):
+        pass
+
+class SensorCreateForm(forms.ModelForm):
+    def clean_serial_number(self):
+        serial_number = self.cleaned_data.get('serial_number')
+
+        qs = Sensor.objects.filter(serial_number__iexact=serial_number, archived=False)
+
+        if self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+
+        if qs.exists():
+            raise forms.ValidationError("Сенсор з таким серійним номером вже зареєстровано в системі.")
+
+        return serial_number
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        offset_x = cleaned_data.get('offset_x')
+        offset_y = cleaned_data.get('offset_y')
+
+        if offset_x is not None and (offset_x < 0 or offset_x > 100):
+            self.add_error('offset_x', "Координата X має бути в межах від 0 до 100%.")
+
+        if offset_y is not None and (offset_y < 0 or offset_y > 100):
+            self.add_error('offset_y', "Координата Y має бути в межах від 0 до 100%.")
+
+        return cleaned_data
+
+    class Meta:
+        model = Sensor
+        fields = ['type', 'sector', 'serial_number', 'offset_x', 'offset_y', 'is_active']
+
+        widgets = {
+            'type': forms.Select(attrs={'class': 'form-control'}),
+            'sector': forms.Select(attrs={'class': 'form-control'}),
+            'serial_number': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Наприклад: SN-A1-2024'
+            }),
+            'offset_x': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.1',
+                'min': '0',
+                'max': '100'
+            }),
+            'offset_y': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.1',
+                'min': '0',
+                'max': '100'
+            }),
+            'is_active': forms.CheckboxInput(),
+        }
+
+        error_messages = {
+            'type': {
+                'required': "Будь ласка, оберіть тип сенсора.",
+            },
+            'sector': {
+                'required': "Будь ласка, прив'яжіть сенсор до сектора.",
+            },
+            'serial_number': {
+                'required': "Серійний номер є обов'язковим.",
+                'max_length': "Серійний номер занадто довгий.",
+            },
+            'offset_x': {
+                'required': "Вкажіть координату X.",
+                'invalid': "Введіть коректне число."
+            },
+            'offset_y': {
+                'required': "Вкажіть координату Y.",
+                'invalid': "Введіть коректне число."
+            }
+        }
+
+
+class SensorUpdateForm(SensorCreateForm):
+    class Meta(SensorCreateForm.Meta):
         pass

@@ -6,7 +6,7 @@
 {% block body %}
     <div class="page-header">
         <h1>Сенсори</h1>
-        <a href="#" class="btn-primary">
+        <a href="create" class="btn-primary">
             <i class="ri-add-line"></i>
             <span>Додати сенсор</span>
         </a>
@@ -87,7 +87,7 @@
                     </div>
 
                     <div class="sensor-actions">
-                        <a class="btn-icon edit" href="#" title="Редагувати">
+                        <a class="btn-icon edit" href="update/{{ sensor.pk }}" title="Редагувати">
                             <i class="ri-pencil-line"></i>
                         </a>
                         <button type="button"

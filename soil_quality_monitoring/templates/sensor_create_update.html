@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if form.instance.pk %}Редагувати сенсор{% else %}Додати сенсор{% endif %} | SmartFarm
+{% endblock %}
+
+{% block body %}
+    <div class="page-header">
+        <div class="header-title">
+            <a href="{% url 'sensors' %}" class="back-link"><i class="ri-arrow-left-line"></i></a>
+            <h1>{% if form.instance.pk %}Редагувати сенсор{% else %}Додати новий сенсор{% endif %}</h1>
+        </div>
+    </div>
+
+    <div class="form-container">
+        <form method="post" class="sensor-form" novalidate>
+            {% csrf_token %}
+
+            <div class="main-info-inputs">
+
+                <div class="form-row">
+                    <div class="form-group flex-grow">
+                        <label for="{{ form.serial_number.id_for_label }}">Серійний номер</label>
+                        {{ form.serial_number }}
+                        <span class="input-hint">{{ form.serial_number.help_text }}</span>
+                        {% for error in form.serial_number.errors %}
+                            <div class="error-message">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="form-group status-group">
+                        <label>Статус</label>
+                        <div class="status-toggle-container">
+                            <label class="toggle-switch">
+                                {{ form.is_active }}
+                                <span class="slider round"></span>
+                            </label>
+                            <span class="status-text" id="sensorStatusText">
+                            {% if form.instance.is_active or not form.instance.pk %}Активний{% else %}
+                                Вимкнений{% endif %}
+                        </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row two-cols">
+                    <div class="form-group">
+                        <label for="{{ form.type.id_for_label }}">Тип сенсора</label>
+                        <div class="select-wrapper">
+                            {{ form.type }}
+                            <i class="ri-arrow-down-s-line select-arrow"></i>
+                        </div>
+                        {% for error in form.type.errors %}
+                            <div class="error-message">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.sector.id_for_label }}">Сектор (Локація)</label>
+                        <div class="select-wrapper">
+                            {{ form.sector }}
+                            <i class="ri-arrow-down-s-line select-arrow"></i>
+                        </div>
+                        {% for error in form.sector.errors %}
+                            <div class="error-message">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="internal-divider">Координати на мапі</div>
+
+                <div class="form-row two-cols">
+                    <div class="form-group">
+                        <label for="{{ form.offset_x.id_for_label }}">Позиція по осі X</label>
+                        <div class="input-with-addon">
+                            {{ form.offset_x }}
+                            <span class="addon">%</span>
+                        </div>
+                        {% for error in form.offset_x.errors %}
+                            <div class="error-message">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.offset_y.id_for_label }}">Позиція по осі Y</label>
+                        <div class="input-with-addon">
+                            {{ form.offset_y }}
+                            <span class="addon">%</span>
+                        </div>
+                        {% for error in form.offset_y.errors %}
+                            <div class="error-message">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="form-actions">
+                <a href="{% url 'sensors' %}" class="btn-secondary">Скасувати</a>
+                <button type="submit" class="btn-submit">
+                    {% if form.instance.pk %}Зберегти зміни{% else %}Додати сенсор{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const checkbox = document.querySelector('.toggle-switch input[type="checkbox"]');
+            const statusText = document.getElementById('sensorStatusText');
+
+            if (checkbox && statusText) {
+                checkbox.addEventListener('change', function () {
+                    statusText.textContent = this.checked ? 'Активний' : 'Вимкнений';
+                });
+            }
+        });
+    </script>
+{% endblock %}
