@@ -44,12 +44,12 @@ class Crop(models.Model):
                     MaxValueValidator(14.0, message="pH не може бути більше 14.")]
     )
     min_nitrogen = models.FloatField(
-        verbose_name="Мін. вміст нітратів",
+        verbose_name="Мін. вміст азоту",
         help_text="мг/кг",
         validators = [MinValueValidator(0.0, message="Не може бути менше 0.")]
     )
     max_nitrogen = models.FloatField(
-        verbose_name="Макс. вміст нітратів",
+        verbose_name="Макс. вміст азоту",
         help_text="мг/кг",
         validators = [MinValueValidator(0.0, message="Не може бути менше 0.")]
     )
@@ -96,7 +96,7 @@ class Sensor(models.Model):
         TEMPERATURE = 'TEMP', 'Температура'
         HUMIDITY = 'HUM', 'Вологість'
         PH = 'PH', 'Кислотність'
-        NITRATES = ('NIT', 'Нітрати')
+        NITROGEN = ('NIT', 'Азот')
 
     type = models.CharField(
         max_length=5,
