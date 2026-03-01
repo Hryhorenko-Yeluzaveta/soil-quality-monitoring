@@ -4,10 +4,10 @@ from django.contrib import admin
 from django.urls import path, include
 from django.views.generic import TemplateView
 
-from farm_monitoring.views import crops, api, sensors
+from farm_monitoring.views import crops, api, sensors, sectors
 
 urlpatterns = [
-    path('', TemplateView.as_view(template_name='index.html')),
+    path('', TemplateView.as_view(template_name='index.html'), name="dashboard"),
     # Crops urls
     path('crops/', crops.CropListView.as_view(), name='crops'),
     path('crops/create', crops.CropCreateView.as_view()),
@@ -18,6 +18,10 @@ urlpatterns = [
     path('sensors/create', sensors.SensorCreateView.as_view()),
     path('sensors/update/<int:pk>', sensors.SensorUpdateView.as_view(), name='sensor_update'),
     path('sensors/delete/<int:pk>', sensors.SensorDeleteView.as_view(), name='sensor_delete'),
+    # Sector urls
+    path('sectors/create', sectors.SectorCreateView.as_view(), name="sector_create"),
+    path('sectors/update/<int:pk>', sectors.SectorUpdateView.as_view(), name="sector_update"),
+    # path('sectors/delete/<int:pk>', name="sector_delete"),
     # Measurements urls
     path('api/sensors', api.get_active_sensors, name='get_sensors'),
     path('api/measurement', api.add_measurement, name='api_add_measurement'),

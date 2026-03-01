@@ -63,21 +63,34 @@ class Crop(models.Model):
 
 class Sector(models.Model):
     name = models.CharField(max_length=50, verbose_name="Назва сектору")
-    crop = models.ForeignKey(Crop, on_delete=models.SET_NULL, null=True)
-    x_start = models.FloatField(
-        help_text="у %",
-        validators = [MinValueValidator(0.0), MaxValueValidator(100.0)]
+    crop = models.ForeignKey(
+        'Crop',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Посіяна культура",
+        related_name="sectors",
+        limit_choices_to = {'archived': False}
     )
-    y_start = models.FloatField(
-        help_text="у %",
+    archived = models.BooleanField(default=False, verbose_name="Заархівовано")
+    x_start = models.FloatField(
+        verbose_name="Позиція X",
+        help_text="Зміщення зліва у %",
         validators=[MinValueValidator(0.0), MaxValueValidator(100.0)]
     )
-    height = models.FloatField(
-        help_text="у %",
+    y_start = models.FloatField(
+        verbose_name="Позиція Y",
+        help_text="Зміщення зверху у %",
         validators=[MinValueValidator(0.0), MaxValueValidator(100.0)]
     )
     width = models.FloatField(
-        help_text="у %",
+        verbose_name="Ширина",
+        help_text="Ширина сектора у %",
+        validators=[MinValueValidator(0.0), MaxValueValidator(100.0)]
+    )
+    height = models.FloatField(
+        verbose_name="Висота",
+        help_text="Висота сектора у %",
         validators=[MinValueValidator(0.0), MaxValueValidator(100.0)]
     )
 
@@ -122,7 +135,13 @@ class Sensor(models.Model):
     )
     is_active = models.BooleanField(default=True, verbose_name="Активований")
     archived = models.BooleanField(default=False, verbose_name="Заархівовано")
-    sector = models.ForeignKey(Sector, on_delete=models.CASCADE, related_name="sensors", verbose_name="Сектор")
+    sector = models.ForeignKey(
+        Sector,
+        on_delete=models.CASCADE,
+        related_name="sensors",
+        verbose_name="Сектор",
+        limit_choices_to = {'archived': False}
+    )
 
     def __str__(self):
         return self.serial_number

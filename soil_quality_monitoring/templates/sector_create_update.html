@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if form.instance.pk %}Редагувати сектор{% else %}Додати сектор{% endif %} | SmartFarm
+{% endblock %}
+
+{% block body %}
+<div class="form-container">
+    <div class="header-title" style="margin-bottom: 24px;">
+        <a href="{% url 'dashboard' %}" class="back-link"><i class="ri-arrow-left-line"></i></a>
+        <h1>{% if form.instance.pk %}Редагувати сектор{% else %}Додати новий сектор{% endif %}</h1>
+    </div>
+
+    <form method="post" novalidate id="sector-form">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="error-message" style="margin-bottom: 15px">
+                {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="main-info-inputs">
+            <div class="form-group">
+                <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+                {{ form.name }}
+                {% for error in form.name.errors %}
+                    <div class="error-message">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="form-group custom-autocomplete-group">
+                <label for="crop-search-input">{{ form.crop.label }}</label>
+
+                <div style="display: none;">
+                    {{ form.crop }}
+                </div>
+
+                <div class="search-input-wrapper">
+                    <i class="ri-search-line input-search-icon"></i>
+
+                    <input type="text"
+                           id="crop-search-input"
+                           class="form-control"
+                           placeholder="Почніть вводити назву культури..."
+                           autocomplete="off">
+
+                    <i class="ri-close-circle-fill clear-search-icon" id="clear-crop-btn" title="Очистити вибір"></i>
+                </div>
+
+                <ul class="autocomplete-list" id="crop-autocomplete-list"></ul>
+
+                {% for error in form.crop.errors %}
+                    <div class="error-message">{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <h3 class="section-title">Відображення на мапі</h3>
+
+        <div class="params-grid">
+            <div class="param-card">
+                <div class="param-header">
+                    <i class="ri-map-pin-line icon"></i> Координати
+                </div>
+                <div class="range-inputs">
+                    <div class="input-col">
+                        <label for="{{ form.x_start.id_for_label }}">Зліва (Вісь X), %</label>
+                        {{ form.x_start }}
+                        {% for error in form.x_start.errors %}
+                            <div class="error-message">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <span class="separator">/</span>
+                    <div class="input-col">
+                        <label for="{{ form.y_start.id_for_label }}">Зверху (Вісь Y), %</label>
+                        {{ form.y_start }}
+                        {% for error in form.y_start.errors %}
+                            <div class="error-message">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="param-card">
+                <div class="param-header">
+                    <i class="ri-shape-2-line icon"></i> Розміри
+                </div>
+                <div class="range-inputs">
+                    <div class="input-col">
+                        <label for="{{ form.width.id_for_label }}">Ширина, %</label>
+                        {{ form.width }}
+                        {% for error in form.width.errors %}
+                            <div class="error-message">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <span class="separator">x</span>
+                    <div class="input-col">
+                        <label for="{{ form.height.id_for_label }}">Висота, %</label>
+                        {{ form.height }}
+                        {% for error in form.height.errors %}
+                            <div class="error-message">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="{% url 'dashboard' %}" class="btn-secondary">Скасувати</a>
+            <button type="submit" class="btn-submit">
+                {% if form.instance.pk %}Зберегти зміни{% else %}Створити сектор{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const hiddenSelect = document.getElementById('id_crop');
+        const searchInput = document.getElementById('crop-search-input');
+        const resultsList = document.getElementById('crop-autocomplete-list');
+        const clearBtn = document.getElementById('clear-crop-btn');
+
+        if (!hiddenSelect || !searchInput) return;
+
+        const selectedOption = hiddenSelect.options[hiddenSelect.selectedIndex];
+        if (selectedOption && selectedOption.value) {
+            searchInput.value = selectedOption.text;
+            clearBtn.style.display = 'block';
+        }
+        function renderOptions(filterText = '') {
+            resultsList.innerHTML = '';
+            const query = filterText.toLowerCase();
+            let hasResults = false;
+            Array.from(hiddenSelect.options).forEach(option => {
+                if (!option.value) return;
+
+                const text = option.text.toLowerCase();
+                if (text.includes(query)) {
+                    hasResults = true;
+                    const li = document.createElement('li');
+                    li.textContent = option.text;
+
+                    li.addEventListener('click', function() {
+                        hiddenSelect.value = option.value;
+                        searchInput.value = option.text;
+                        resultsList.style.display = 'none';
+                        clearBtn.style.display = 'block';
+                    });
+                    resultsList.appendChild(li);
+                }
+            });
+
+            if (!hasResults) {
+                const li = document.createElement('li');
+                li.textContent = 'Нічого не знайдено';
+                li.className = 'no-results';
+                resultsList.appendChild(li);
+            }
+
+            resultsList.style.display = 'block';
+        }
+
+        searchInput.addEventListener('input', function() {
+            clearBtn.style.display = this.value ? 'block' : 'none';
+            renderOptions(this.value);
+            hiddenSelect.value = '';
+        });
+        searchInput.addEventListener('click', function() {
+            renderOptions(this.value);
+        });
+        clearBtn.addEventListener('click', function() {
+            searchInput.value = '';
+            hiddenSelect.value = '';
+            this.style.display = 'none';
+            renderOptions('');
+            searchInput.focus();
+        });
+        document.addEventListener('click', function(e) {
+            if (!searchInput.contains(e.target) && !resultsList.contains(e.target)) {
+                resultsList.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}

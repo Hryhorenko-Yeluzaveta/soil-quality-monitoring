@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Crop, Sensor
+from .models import Crop, Sensor, Sector
 
 
 class CropCreateForm(forms.ModelForm):
@@ -161,3 +161,109 @@ class SensorCreateForm(forms.ModelForm):
 class SensorUpdateForm(SensorCreateForm):
     class Meta(SensorCreateForm.Meta):
         pass
+
+class SectorCreateForm(forms.ModelForm):
+    def clean_name(self):
+        name = self.cleaned_data.get('name')
+
+        qs = Sector.objects.filter(name__iexact=name, archived=False)
+
+        if self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+
+        if qs.exists():
+            raise forms.ValidationError("Ділянка з такою назвою вже існує.")
+
+        return name
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        x_start = cleaned_data.get('x_start')
+        y_start = cleaned_data.get('y_start')
+        width = cleaned_data.get('width')
+        height = cleaned_data.get('height')
+
+        fields_to_check = {
+            'x_start': 'Позиція X',
+            'y_start': 'Позиція Y',
+            'width': 'Ширина',
+            'height': 'Висота'
+        }
+
+        for field, label in fields_to_check.items():
+            val = cleaned_data.get(field)
+            if val is not None and (val < 0 or val > 100):
+                self.add_error(field, f"{label} має бути в межах від 0 до 100%.")
+
+        if None in (x_start, y_start, width, height):
+            return cleaned_data
+
+        new_x_end = x_start + width
+        new_y_end = y_start + height
+
+        if new_x_end > 100:
+            self.add_error('width', "Ділянка виходить за праву межу карти (X + Ширина > 100%).")
+
+        if new_y_end > 100:
+            self.add_error('height', "Ділянка виходить за нижню межу карти (Y + Висота > 100%).")
+
+        existing_sectors = Sector.objects.filter(archived=False)
+
+        if self.instance.pk:
+            existing_sectors = existing_sectors.exclude(pk=self.instance.pk)
+
+        for sector in existing_sectors:
+            other_x_end = sector.x_start + sector.width
+            other_y_end = sector.y_start + sector.height
+
+            if (x_start < other_x_end and
+                    new_x_end > sector.x_start and
+                    y_start < other_y_end and
+                    new_y_end > sector.y_start):
+                raise forms.ValidationError(
+                    f"Помилка розміщення! Ця ділянка перетинається з існуючою ділянкою «{sector.name}»."
+                )
+
+        return cleaned_data
+
+    class Meta:
+        model = Sector
+        fields = ['name', 'crop', 'x_start', 'y_start', 'width', 'height']
+
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Наприклад: Сектор А-1'
+            }),
+            'x_start': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1', 'min': '0', 'max': '100'}),
+            'y_start': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1', 'min': '0', 'max': '100'}),
+            'width': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1', 'min': '0', 'max': '100'}),
+            'height': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1', 'min': '0', 'max': '100'}),
+        }
+
+        error_messages = {
+            'name': {
+                'required': "Будь ласка, введіть назву ділянки.",
+                'max_length': "Назва занадто довга (максимум 50 символів).",
+            },
+            'x_start': {
+                'required': "Вкажіть початкову координату X.",
+                'invalid': "Введіть коректне число."
+            },
+            'y_start': {
+                'required': "Вкажіть початкову координату Y.",
+                'invalid': "Введіть коректне число."
+            },
+            'width': {
+                'required': "Вкажіть ширину ділянки.",
+                'invalid': "Введіть коректне число."
+            },
+            'height': {
+                'required': "Вкажіть висоту ділянки.",
+                'invalid': "Введіть коректне число."
+            }
+        }
+
+class SectorUpdateForm(SectorCreateForm):
+    pass
