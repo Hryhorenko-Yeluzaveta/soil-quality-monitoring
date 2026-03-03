@@ -7,7 +7,7 @@ from django.views.generic import TemplateView
 from farm_monitoring.views import crops, api, sensors, sectors
 
 urlpatterns = [
-    path('', TemplateView.as_view(template_name='index.html'), name="dashboard"),
+    path('', sectors.SectorListView.as_view(), name="dashboard"),
     # Crops urls
     path('crops/', crops.CropListView.as_view(), name='crops'),
     path('crops/create', crops.CropCreateView.as_view()),

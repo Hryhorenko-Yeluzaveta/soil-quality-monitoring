@@ -4,25 +4,17 @@
 {% block title %}Головна - Карта фермы | SmartFarm{% endblock %}
 
 {% block body %}
-<div class="dashboard-header">
-    <div class="header-title">
-        <h1>Мапа ферми</h1>
-    </div>
-
-    <div class="header-actions">
-        <a href="{% url 'sector_create' %}" class="btn-primary">
-            <i class="ri-add-line"></i> Додати сектор
-        </a>
-    </div>
-</div>
-
-<div class="map-section">
-    <div class="farm-map-canvas" id="farmMap">
-        <div class="canvas-grid"></div>
-
-        <div class="canvas-placeholder-text">
-            <span>Тут будуть відображатися ваші сектори</span>
+    <div class="dashboard-header">
+        <div class="header-title">
+            <h1>Мапа ферми</h1>
+        </div>
+        <div class="header-actions">
+            <a href="{% url 'sector_create' %}" class="btn-primary">
+                <i class="ri-add-line"></i> Додати сектор
+            </a>
         </div>
     </div>
-</div>
+
+    {% include 'components/farm_map.html' with is_interactive=False sectors=sectors %}
+
 {% endblock %}

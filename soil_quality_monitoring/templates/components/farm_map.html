@@ -1,0 +1,219 @@
+<div class="map-section">
+    {% if is_interactive %}
+        <p class="hint-text mb-2" style="margin-bottom: 10px; font-weight: 500; color: #616657;">
+            <i class="ri-drag-move-2-line"></i> Намалюйте сектор прямо на мапі або введіть дані вручну:
+        </p>
+    {% endif %}
+
+    <div class="farm-map-canvas" id="farmMap"
+         {% if is_interactive %}style="cursor: crosshair; touch-action: none;"{% endif %}>
+        <div class="canvas-grid"></div>
+
+        {% if not sectors and not is_interactive %}
+            <div class="canvas-placeholder-text">
+                <span>Тут будуть відображатися ваші сектори. Додайте перший!</span>
+            </div>
+        {% endif %}
+
+        {% for sector in sectors %}
+            <div class="farm-sector {% if not is_interactive and sector.is_critical %}critical{% endif %}"
+                 style="left: {{ sector.x_start|stringformat:'s' }}%;
+                         top: {{ sector.y_start|stringformat:'s' }}%;
+                         width: {{ sector.width|stringformat:'s' }}%;
+                         height: {{ sector.height|stringformat:'s' }}%;
+                         {% if is_interactive %}opacity: 0.4; pointer-events: none; border-style: dashed;{% endif %}"
+                    {% if not is_interactive %}
+                 data-name="{{ sector.name }}"
+                 data-crop="{% if sector.crop %}{{ sector.crop.name }}{% else %}Не засіяно{% endif %}"
+                 data-status="{% if sector.is_critical %}Критичний{% else %}В нормі{% endif %}"
+                 data-sensors="{{ sector.sensors.count|default:'0' }}"
+                    {% endif %}>
+
+                <span class="sector-label">{{ sector.name }}</span>
+            </div>
+        {% endfor %}
+
+        {% if is_interactive %}
+            <div id="ghost-sector" class="ghost-sector"></div>
+        {% endif %}
+    </div>
+</div>
+
+{% if not is_interactive %}
+    <div id="sector-tooltip" class="sector-tooltip">
+        <div class="tooltip-header">
+            <h4 id="tt-name">Назва сектора</h4>
+            <span id="tt-status" class="status-badge">Статус</span>
+        </div>
+        <div class="tooltip-body">
+            <p><i class="ri-leaf-line"></i> Культура: <strong id="tt-crop"></strong></p>
+            <p><i class="ri-sensor-line"></i> Датчиків: <strong id="tt-sensors"></strong></p>
+        </div>
+        <div class="tooltip-footer">
+            <span class="hint-text">Натисніть для деталей</span>
+        </div>
+    </div>
+{% endif %}
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const isInteractive = {{ is_interactive|yesno:"true,false" }};
+        const canvas = document.getElementById('farmMap');
+
+        if (!isInteractive) {
+            const sectors = document.querySelectorAll('.farm-sector');
+            const tooltip = document.getElementById('sector-tooltip');
+            if (!tooltip) return;
+
+            const ttName = document.getElementById('tt-name');
+            const ttCrop = document.getElementById('tt-crop');
+            const ttSensors = document.getElementById('tt-sensors');
+            const ttStatus = document.getElementById('tt-status');
+
+            sectors.forEach(sector => {
+                sector.addEventListener('mouseenter', function (e) {
+                    ttName.textContent = this.getAttribute('data-name');
+                    ttCrop.textContent = this.getAttribute('data-crop');
+                    ttSensors.textContent = this.getAttribute('data-sensors');
+                    ttStatus.textContent = this.getAttribute('data-status');
+
+                    if (this.classList.contains('critical')) {
+                        ttStatus.classList.add('critical-badge');
+                    } else {
+                        ttStatus.classList.remove('critical-badge');
+                    }
+                    tooltip.classList.add('show');
+                });
+
+                sector.addEventListener('mousemove', function (e) {
+                    const xOffset = 15;
+                    const yOffset = 15;
+                    let x = e.clientX + xOffset;
+                    let y = e.clientY + yOffset;
+                    const rect = tooltip.getBoundingClientRect();
+
+                    if (x + rect.width > window.innerWidth) x = e.clientX - rect.width - xOffset;
+                    if (y + rect.height > window.innerHeight) y = e.clientY - rect.height - yOffset;
+
+                    tooltip.style.left = x + 'px';
+                    tooltip.style.top = y + 'px';
+                });
+
+                sector.addEventListener('mouseleave', () => tooltip.classList.remove('show'));
+            });
+        }
+
+        if (isInteractive) {
+            const ghost = document.getElementById('ghost-sector');
+            const inputX = document.getElementById('{{ form.x_start.id_for_label|default:"id_x_start" }}');
+            const inputY = document.getElementById('{{ form.y_start.id_for_label|default:"id_y_start" }}');
+            const inputW = document.getElementById('{{ form.width.id_for_label|default:"id_width" }}');
+            const inputH = document.getElementById('{{ form.height.id_for_label|default:"id_height" }}');
+
+            if (inputX && inputX.value && inputY.value) {
+                ghost.style.left = inputX.value + '%';
+                ghost.style.top = inputY.value + '%';
+                ghost.style.width = inputW.value + '%';
+                ghost.style.height = inputH.value + '%';
+                ghost.style.display = 'block';
+            }
+
+            function updateGhostFromInputs() {
+                const x = parseFloat(inputX.value) || 0;
+                const y = parseFloat(inputY.value) || 0;
+                const w = parseFloat(inputW.value) || 0;
+                const h = parseFloat(inputH.value) || 0;
+
+                if (w > 0 && h > 0) {
+                    ghost.style.left = x + '%';
+                    ghost.style.top = y + '%';
+                    ghost.style.width = w + '%';
+                    ghost.style.height = h + '%';
+                    ghost.style.display = 'block';
+                } else {
+                    ghost.style.display = 'none';
+                }
+            }
+
+            if (inputX && inputY && inputW && inputH) {
+                inputX.addEventListener('input', updateGhostFromInputs);
+                inputY.addEventListener('input', updateGhostFromInputs);
+                inputW.addEventListener('input', updateGhostFromInputs);
+                inputH.addEventListener('input', updateGhostFromInputs);
+            }
+
+            let isDrawing = false;
+            let startX = 0, startY = 0;
+
+            function getPointerPos(e) {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return {x: clientX - rect.left, y: clientY - rect.top, w: rect.width, h: rect.height};
+            }
+
+            function startDraw(e) {
+                isDrawing = true;
+                const pos = getPointerPos(e);
+                startX = pos.x;
+                startY = pos.y;
+                ghost.style.left = startX + 'px';
+                ghost.style.top = startY + 'px';
+                ghost.style.width = '0px';
+                ghost.style.height = '0px';
+                ghost.style.display = 'block';
+            }
+
+            function draw(e) {
+                if (!isDrawing) return;
+                e.preventDefault();
+                const pos = getPointerPos(e);
+
+                const currentX = Math.max(0, Math.min(pos.x, pos.w));
+                const currentY = Math.max(0, Math.min(pos.y, pos.h));
+
+                const width = Math.abs(currentX - startX);
+                const height = Math.abs(currentY - startY);
+                const left = Math.min(currentX, startX);
+                const top = Math.min(currentY, startY);
+
+                ghost.style.left = left + 'px';
+                ghost.style.top = top + 'px';
+                ghost.style.width = width + 'px';
+                ghost.style.height = height + 'px';
+            }
+
+            function endDraw() {
+                if (!isDrawing) return;
+                isDrawing = false;
+
+                const rect = canvas.getBoundingClientRect();
+                const widthPx = parseFloat(ghost.style.width);
+                const heightPx = parseFloat(ghost.style.height);
+
+                if (widthPx < 10 || heightPx < 10) {
+                    ghost.style.display = 'none';
+                    return;
+                }
+
+                if (inputX && inputY && inputW && inputH) {
+                    inputX.value = ((parseFloat(ghost.style.left) / rect.width) * 100).toFixed(1);
+                    inputW.value = ((widthPx / rect.width) * 100).toFixed(1);
+                    inputH.value = ((heightPx / rect.height) * 100).toFixed(1);
+                }
+                ghost.style.left = inputX.value + '%';
+                ghost.style.top = inputY.value + '%';
+                ghost.style.width = inputW.value + '%';
+                ghost.style.height = inputH.value + '%';
+            }
+
+            canvas.addEventListener('mousedown', startDraw);
+            window.addEventListener('mousemove', draw);
+            window.addEventListener('mouseup', endDraw);
+
+            canvas.addEventListener('touchstart', startDraw, {passive: false});
+            window.addEventListener('touchmove', draw, {passive: false});
+            window.addEventListener('touchend', endDraw);
+        }
+    });
+</script>
