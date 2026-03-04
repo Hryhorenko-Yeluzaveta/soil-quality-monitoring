@@ -23,10 +23,24 @@
                          height: {{ sector.height|stringformat:'s' }}%;
                          {% if is_interactive %}opacity: 0.4; pointer-events: none; border-style: dashed;{% endif %}"
                     {% if not is_interactive %}
+                 data-id="{{ sector.id }}"
                  data-name="{{ sector.name }}"
                  data-crop="{% if sector.crop %}{{ sector.crop.name }}{% else %}Не засіяно{% endif %}"
                  data-status="{% if sector.is_critical %}Критичний{% else %}В нормі{% endif %}"
-                 data-sensors="{{ sector.sensors.count|default:'0' }}"
+                 data-sensors-count="{{ sector.sensors.count|default:'0' }}"
+
+                        {# Формуємо список сенсорів з останніми показниками #}
+                 data-sensors-info='[
+                    {% for sensor in sector.sensors.all %}
+                        {
+                            "serial": "{{ sensor.serial_number }}",
+                            "type": "{{ sensor.get_type_display }}",
+                            "latest_value": "{{ sensor.latest_value|default:'—' }}",
+                            "unit": "{{ sensor.unit }}",
+                            "is_critical": {{ sensor.is_critical|yesno:"true,false" }}
+                        }{% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                 ]'
                     {% endif %}>
 
                 <span class="sector-label">{{ sector.name }}</span>
@@ -55,6 +69,39 @@
     </div>
 {% endif %}
 
+{% if not is_interactive %}
+    <div id="sector-modal-overlay" class="modal-overlay">
+        <div class="sector-modal">
+            <div class="modal-header">
+                <div>
+                    <h3 id="modal-sector-name">Назва сектора</h3>
+                    <span id="modal-sector-status" class="status-badge">Статус</span>
+                </div>
+                <button id="close-modal-btn" class="close-btn"><i class="ri-close-line"></i></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="info-grid" style="grid-template-columns: 1fr;">
+                    <div class="info-item">
+                        <span class="info-label"><i class="ri-leaf-line"></i> Посіяна культура</span>
+                        <strong id="modal-sector-crop">Пшениця</strong>
+                    </div>
+                </div>
+
+                <h4 class="sensors-title">Показники сенсорів (<span id="modal-sensors-count">0</span>)</h4>
+
+                <div id="modal-sensors-list" class="sector-sensors-list">
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <a href="#" id="modal-edit-btn" class="btn-secondary"><i class="ri-pencil-line"></i> Редагувати</a>
+                <a href="#" id="modal-delete-btn" class="btn-danger"><i class="ri-delete-bin-line"></i> Видалити</a>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const isInteractive = {{ is_interactive|yesno:"true,false" }};
@@ -63,6 +110,15 @@
         if (!isInteractive) {
             const sectors = document.querySelectorAll('.farm-sector');
             const tooltip = document.getElementById('sector-tooltip');
+            const modalOverlay = document.getElementById('sector-modal-overlay');
+            const closeBtn = document.getElementById('close-modal-btn');
+            const mName = document.getElementById('modal-sector-name');
+            const mStatus = document.getElementById('modal-sector-status');
+            const mCrop = document.getElementById('modal-sector-crop');
+            const mSensorsCount = document.getElementById('modal-sensors-count');
+            const mSensorsList = document.getElementById('modal-sensors-list');
+            const mEditBtn = document.getElementById('modal-edit-btn');
+            const mDeleteBtn = document.getElementById('modal-delete-btn');
             if (!tooltip) return;
 
             const ttName = document.getElementById('tt-name');
@@ -74,7 +130,7 @@
                 sector.addEventListener('mouseenter', function (e) {
                     ttName.textContent = this.getAttribute('data-name');
                     ttCrop.textContent = this.getAttribute('data-crop');
-                    ttSensors.textContent = this.getAttribute('data-sensors');
+                    ttSensors.textContent = this.getAttribute('data-sensors-count');
                     ttStatus.textContent = this.getAttribute('data-status');
 
                     if (this.classList.contains('critical')) {
@@ -100,6 +156,81 @@
                 });
 
                 sector.addEventListener('mouseleave', () => tooltip.classList.remove('show'));
+            });
+
+            function openModal(sectorElem) {
+                const sectorId = sectorElem.getAttribute('data-id');
+                const isCritical = sectorElem.classList.contains('critical');
+
+                mName.textContent = sectorElem.getAttribute('data-name');
+                mCrop.textContent = sectorElem.getAttribute('data-crop');
+                mSensorsCount.textContent = sectorElem.getAttribute('data-sensors-count');
+
+                mStatus.textContent = sectorElem.getAttribute('data-status');
+                if (isCritical) {
+                    mStatus.className = 'status-badge critical-badge';
+                } else {
+                    mStatus.className = 'status-badge';
+                }
+
+                try {
+                    const sensorsInfo = JSON.parse(sectorElem.getAttribute('data-sensors-info') || '[]');
+                    mSensorsList.innerHTML = '';
+
+                    if (sensorsInfo.length === 0) {
+                        mSensorsList.innerHTML = '<p class="no-sensors">У цьому секторі ще немає встановлених сенсорів.</p>';
+                    } else {
+                        sensorsInfo.forEach(sensor => {
+                            const iconClass = sensor.is_critical ? 'ri-error-warning-line text-danger' : 'ri-checkbox-circle-line text-success';
+                            const itemClass = sensor.is_critical ? 'sensor-item critical' : 'sensor-item';
+                            const valueDisplay = sensor.latest_value !== '—' ? `${sensor.latest_value} ${sensor.unit}` : 'Немає даних';
+
+                            mSensorsList.innerHTML += `
+                                <div class="${itemClass}">
+                                    <div class="sensor-info">
+                                        <i class="${iconClass}"></i>
+                                        <div>
+                                            <strong>${sensor.type}</strong>
+                                            <span>${sensor.serial}</span>
+                                        </div>
+                                    </div>
+                                    <div class="sensor-value-box ${sensor.is_critical ? 'value-critical' : 'value-normal'}">
+                                        ${valueDisplay}
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    }
+                } catch (e) {
+                    console.error("Помилка парсингу сенсорів", e);
+                }
+
+                mEditBtn.href = `/sectors/update/${sectorId}`;
+                mDeleteBtn.onclick = function(e) {
+                    e.preventDefault();
+                    closeModal();
+                    const sectorName = sectorElem.getAttribute('data-name');
+                    openDeleteModal(`/sectors/delete/${sectorId}`, sectorName);
+                };
+
+                tooltip.classList.remove('show');
+                modalOverlay.classList.add('active');
+            }
+
+            function closeModal() {
+                modalOverlay.classList.remove('active');
+            }
+
+            sectors.forEach(sector => {
+
+                sector.addEventListener('click', function (e) {
+                    openModal(this);
+                });
+            });
+
+            closeBtn.addEventListener('click', closeModal);
+            modalOverlay.addEventListener('click', function (e) {
+                if (e.target === modalOverlay) closeModal();
             });
         }
 
@@ -198,6 +329,7 @@
 
                 if (inputX && inputY && inputW && inputH) {
                     inputX.value = ((parseFloat(ghost.style.left) / rect.width) * 100).toFixed(1);
+                    inputY.value = ((parseFloat(ghost.style.top) / rect.height) * 100).toFixed(1);
                     inputW.value = ((widthPx / rect.width) * 100).toFixed(1);
                     inputH.value = ((heightPx / rect.height) * 100).toFixed(1);
                 }

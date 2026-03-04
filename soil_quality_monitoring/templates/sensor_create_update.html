@@ -109,6 +109,45 @@
         document.addEventListener('DOMContentLoaded', function () {
             const checkbox = document.querySelector('.toggle-switch input[type="checkbox"]');
             const statusText = document.getElementById('sensorStatusText');
+            const sectorSelect = document.querySelector('select[name="sector"]');
+            const toggleContainer = document.querySelector('.status-toggle-container');
+            const toggleSwitch = document.querySelector('.toggle-switch');
+
+            function checkSectorSelection() {
+                if (!sectorSelect || !checkbox || !toggleContainer) return;
+
+                const isSectorSelected = sectorSelect.value && sectorSelect.value.trim() !== '';
+
+                if (!isSectorSelected) {
+                    checkbox.disabled = true;
+                    checkbox.checked = false;
+                    statusText.textContent = 'Вимкнений';
+
+                    toggleContainer.style.opacity = '0.6';
+                    toggleContainer.style.cursor = 'not-allowed';
+
+                    toggleContainer.setAttribute('data-disabled', 'true');
+                    toggleContainer.setAttribute('data-tooltip', 'Для активації необхідно обрати сектор.');
+
+                    if (toggleSwitch) toggleSwitch.style.pointerEvents = 'none';
+                } else {
+                    checkbox.disabled = false;
+
+                    toggleContainer.style.opacity = '1';
+                    toggleContainer.style.cursor = 'auto';
+
+                    toggleContainer.removeAttribute('data-disabled');
+                    toggleContainer.removeAttribute('data-tooltip');
+
+                    if (toggleSwitch) toggleSwitch.style.pointerEvents = 'auto';
+                }
+            }
+
+            checkSectorSelection();
+
+            if (sectorSelect) {
+                sectorSelect.addEventListener('change', checkSectorSelection);
+            }
 
             if (checkbox && statusText) {
                 checkbox.addEventListener('change', function () {

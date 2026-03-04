@@ -21,7 +21,7 @@ urlpatterns = [
     # Sector urls
     path('sectors/create', sectors.SectorCreateView.as_view(), name="sector_create"),
     path('sectors/update/<int:pk>', sectors.SectorUpdateView.as_view(), name="sector_update"),
-    # path('sectors/delete/<int:pk>', name="sector_delete"),
+    path('sectors/delete/<int:pk>', sectors.SectorDeleteView.as_view(), name="sector_delete"),
     # Measurements urls
     path('api/sensors', api.get_active_sensors, name='get_sensors'),
     path('api/measurement', api.add_measurement, name='api_add_measurement'),

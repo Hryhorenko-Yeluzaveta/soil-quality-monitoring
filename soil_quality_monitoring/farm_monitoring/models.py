@@ -94,10 +94,6 @@ class Sector(models.Model):
         validators=[MinValueValidator(0.0), MaxValueValidator(100.0)]
     )
 
-    @property
-    def area(self):
-        return self.width * self.height
-
     def __str__(self):
         return self.name
     class Meta:
@@ -137,7 +133,9 @@ class Sensor(models.Model):
     archived = models.BooleanField(default=False, verbose_name="Заархівовано")
     sector = models.ForeignKey(
         Sector,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="sensors",
         verbose_name="Сектор",
         limit_choices_to = {'archived': False}
@@ -147,7 +145,7 @@ class Sensor(models.Model):
         return self.serial_number
 
     class Meta:
-        verbose_name = "Сенсор",
+        verbose_name = "Сенсор"
         verbose_name_plural = "Сенсори"
         constraints = [
             models.UniqueConstraint(

@@ -65,7 +65,8 @@
 
                     <div class="sensor-info-group sector-info" title="Сектор">
                         <i class="ri-map-pin-line"></i>
-                        <span>{{ sensor.sector }}</span>
+                        <span> {% if sensor.sector != None %} {{ sensor.sector }} {% else %} Не встановлений {% endif %}
+                        </span>
                     </div>
 
                     <div class="sensor-info-group crop-info" title="Посіяна культура">

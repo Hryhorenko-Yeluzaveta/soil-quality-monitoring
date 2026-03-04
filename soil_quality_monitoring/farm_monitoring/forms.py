@@ -101,12 +101,18 @@ class SensorCreateForm(forms.ModelForm):
 
         offset_x = cleaned_data.get('offset_x')
         offset_y = cleaned_data.get('offset_y')
+        sector = cleaned_data.get('sector')
+        is_active = cleaned_data.get('is_active')
 
         if offset_x is not None and (offset_x < 0 or offset_x > 100):
             self.add_error('offset_x', "Координата X має бути в межах від 0 до 100%.")
 
         if offset_y is not None and (offset_y < 0 or offset_y > 100):
             self.add_error('offset_y', "Координата Y має бути в межах від 0 до 100%.")
+
+        if not sector and is_active:
+            self.add_error('is_active',
+                           "Сенсор не може бути активним без прив'язки до сектора. Вимкніть його або оберіть сектор.")
 
         return cleaned_data
 
@@ -139,9 +145,6 @@ class SensorCreateForm(forms.ModelForm):
         error_messages = {
             'type': {
                 'required': "Будь ласка, оберіть тип сенсора.",
-            },
-            'sector': {
-                'required': "Будь ласка, прив'яжіть сенсор до сектора.",
             },
             'serial_number': {
                 'required': "Серійний номер є обов'язковим.",
