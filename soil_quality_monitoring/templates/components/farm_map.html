@@ -18,18 +18,16 @@
         {% for sector in sectors %}
             <div class="farm-sector {% if not is_interactive and sector.is_critical %}critical{% endif %}"
                  style="left: {{ sector.x_start|stringformat:'s' }}%;
-                         top: {{ sector.y_start|stringformat:'s' }}%;
-                         width: {{ sector.width|stringformat:'s' }}%;
-                         height: {{ sector.height|stringformat:'s' }}%;
-                         {% if is_interactive %}opacity: 0.4; pointer-events: none; border-style: dashed;{% endif %}"
-                    {% if not is_interactive %}
+                        top: {{ sector.y_start|stringformat:'s' }}%;
+                        width: {{ sector.width|stringformat:'s' }}%;
+                        height: {{ sector.height|stringformat:'s' }}%;
+                        {% if is_interactive %}opacity: 0.4; pointer-events: none; border-style: dashed;{% endif %}"
+                 {% if not is_interactive %}
                  data-id="{{ sector.id }}"
                  data-name="{{ sector.name }}"
                  data-crop="{% if sector.crop %}{{ sector.crop.name }}{% else %}Не засіяно{% endif %}"
                  data-status="{% if sector.is_critical %}Критичний{% else %}В нормі{% endif %}"
                  data-sensors-count="{{ sector.sensors.count|default:'0' }}"
-
-                        {# Формуємо список сенсорів з останніми показниками #}
                  data-sensors-info='[
                     {% for sensor in sector.sensors.all %}
                         {
@@ -41,9 +39,22 @@
                         }{% if not forloop.last %},{% endif %}
                     {% endfor %}
                  ]'
-                    {% endif %}>
+                 {% endif %}>
 
                 <span class="sector-label">{{ sector.name }}</span>
+
+                {% if not is_interactive %}
+                    {% for sensor in sector.sensors.all %}
+                        <div class="sensor-pin {% if sensor.is_critical %}critical{% elif not sensor.is_active %}inactive{% endif %}"
+                             style="left: {{ sensor.offset_x|stringformat:'s' }}%; top: {{ sensor.offset_y|stringformat:'s' }}%;"
+                             data-type="{{ sensor.get_type_display }}"
+                             data-serial="{{ sensor.serial_number }}"
+                             data-value="{{ sensor.latest_value|default:'—' }} {{ sensor.unit }}"
+                             data-status="{% if sensor.is_critical %}Критичний{% elif not sensor.is_active %}Вимкнений{% else %}В нормі{% endif %}">
+                            <i class="ri-sensor-line"></i>
+                        </div>
+                    {% endfor %}
+                {% endif %}
             </div>
         {% endfor %}
 
@@ -54,17 +65,14 @@
 </div>
 
 {% if not is_interactive %}
-    <div id="sector-tooltip" class="sector-tooltip">
+    <div id="sensor-tooltip" class="sector-tooltip">
         <div class="tooltip-header">
-            <h4 id="tt-name">Назва сектора</h4>
-            <span id="tt-status" class="status-badge">Статус</span>
+            <h4 id="tt-sensor-type">Тип сенсора</h4>
+            <span id="tt-sensor-status" class="status-badge">Статус</span>
         </div>
         <div class="tooltip-body">
-            <p><i class="ri-leaf-line"></i> Культура: <strong id="tt-crop"></strong></p>
-            <p><i class="ri-sensor-line"></i> Датчиків: <strong id="tt-sensors"></strong></p>
-        </div>
-        <div class="tooltip-footer">
-            <span class="hint-text">Натисніть для деталей</span>
+            <p><i class="ri-barcode-line"></i> S/N: <strong id="tt-sensor-serial"></strong></p>
+            <p><i class="ri-dashboard-3-line"></i> Значення: <strong id="tt-sensor-value"></strong></p>
         </div>
     </div>
 {% endif %}
@@ -109,7 +117,8 @@
 
         if (!isInteractive) {
             const sectors = document.querySelectorAll('.farm-sector');
-            const tooltip = document.getElementById('sector-tooltip');
+            const sensorPins = document.querySelectorAll('.sensor-pin');
+            const tooltip = document.getElementById('sensor-tooltip');
             const modalOverlay = document.getElementById('sector-modal-overlay');
             const closeBtn = document.getElementById('close-modal-btn');
             const mName = document.getElementById('modal-sector-name');
@@ -119,29 +128,41 @@
             const mSensorsList = document.getElementById('modal-sensors-list');
             const mEditBtn = document.getElementById('modal-edit-btn');
             const mDeleteBtn = document.getElementById('modal-delete-btn');
+
             if (!tooltip) return;
 
-            const ttName = document.getElementById('tt-name');
-            const ttCrop = document.getElementById('tt-crop');
-            const ttSensors = document.getElementById('tt-sensors');
-            const ttStatus = document.getElementById('tt-status');
+            const ttType = document.getElementById('tt-sensor-type');
+            const ttSerial = document.getElementById('tt-sensor-serial');
+            const ttValue = document.getElementById('tt-sensor-value');
+            const ttStatus = document.getElementById('tt-sensor-status');
 
-            sectors.forEach(sector => {
-                sector.addEventListener('mouseenter', function (e) {
-                    ttName.textContent = this.getAttribute('data-name');
-                    ttCrop.textContent = this.getAttribute('data-crop');
-                    ttSensors.textContent = this.getAttribute('data-sensors-count');
-                    ttStatus.textContent = this.getAttribute('data-status');
+            sensorPins.forEach(pin => {
+                pin.addEventListener('mouseenter', function (e) {
+                    ttType.textContent = this.getAttribute('data-type');
+                    ttSerial.textContent = this.getAttribute('data-serial');
+                    ttValue.textContent = this.getAttribute('data-value');
 
-                    if (this.classList.contains('critical')) {
-                        ttStatus.classList.add('critical-badge');
+                    const statusText = this.getAttribute('data-status');
+                    ttStatus.textContent = statusText;
+
+                    if (this.classList.contains('critical') || statusText === 'Критичний') {
+                        ttStatus.className = 'status-badge critical-badge';
+                        ttStatus.style.background = '#fdf3f1';
+                        ttStatus.style.color = '#b84731';
+                    } else if (statusText === 'Вимкнений') {
+                        ttStatus.className = 'status-badge';
+                        ttStatus.style.background = '#e0e0e0';
+                        ttStatus.style.color = '#555';
                     } else {
-                        ttStatus.classList.remove('critical-badge');
+                        ttStatus.className = 'status-badge';
+                        ttStatus.style.background = '#e8f5e9';
+                        ttStatus.style.color = '#2e7d32';
                     }
+
                     tooltip.classList.add('show');
                 });
 
-                sector.addEventListener('mousemove', function (e) {
+                pin.addEventListener('mousemove', function (e) {
                     const xOffset = 15;
                     const yOffset = 15;
                     let x = e.clientX + xOffset;
@@ -155,7 +176,11 @@
                     tooltip.style.top = y + 'px';
                 });
 
-                sector.addEventListener('mouseleave', () => tooltip.classList.remove('show'));
+                pin.addEventListener('mouseleave', () => tooltip.classList.remove('show'));
+
+                pin.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
             });
 
             function openModal(sectorElem) {
@@ -171,6 +196,8 @@
                     mStatus.className = 'status-badge critical-badge';
                 } else {
                     mStatus.className = 'status-badge';
+                    mStatus.style.background = '';
+                    mStatus.style.color = '';
                 }
 
                 try {
@@ -222,7 +249,6 @@
             }
 
             sectors.forEach(sector => {
-
                 sector.addEventListener('click', function (e) {
                     openModal(this);
                 });
