@@ -136,6 +136,8 @@
             const ttValue = document.getElementById('tt-sensor-value');
             const ttStatus = document.getElementById('tt-sensor-status');
 
+            let currentOpenSectorId = null;
+
             sensorPins.forEach(pin => {
                 pin.addEventListener('mouseenter', function (e) {
                     ttType.textContent = this.getAttribute('data-type');
@@ -185,6 +187,7 @@
 
             function openModal(sectorElem) {
                 const sectorId = sectorElem.getAttribute('data-id');
+                currentOpenSectorId = sectorId;
                 const isCritical = sectorElem.classList.contains('critical');
 
                 mName.textContent = sectorElem.getAttribute('data-name');
@@ -246,6 +249,7 @@
 
             function closeModal() {
                 modalOverlay.classList.remove('active');
+                currentOpenSectorId = null;
             }
 
             sectors.forEach(sector => {
@@ -258,6 +262,91 @@
             modalOverlay.addEventListener('click', function (e) {
                 if (e.target === modalOverlay) closeModal();
             });
+
+            async function fetchRealTimeData() {
+                try {
+                    const response = await fetch('/api/sectors/realtime/');
+                    if (!response.ok) return;
+
+                    const data = await response.json();
+
+                    data.sectors.forEach(serverSector => {
+                        const sectorElement = document.querySelector(`.farm-sector[data-id="${serverSector.id}"]`);
+
+                        if (sectorElement) {
+                            if (serverSector.is_critical) {
+                                sectorElement.classList.add('critical');
+                            } else {
+                                sectorElement.classList.remove('critical');
+                            }
+
+                            sectorElement.setAttribute('data-status', serverSector.status_text);
+                            sectorElement.setAttribute('data-sensors-info', JSON.stringify(serverSector.sensors_info));
+
+                            serverSector.sensors_info.forEach(sensor => {
+                                const pin = sectorElement.querySelector(`.sensor-pin[data-serial="${sensor.serial}"]`);
+                                if (pin) {
+                                    if (sensor.is_critical) {
+                                        pin.classList.add('critical');
+                                        pin.classList.remove('inactive');
+                                        pin.setAttribute('data-status', 'Критичний');
+                                    } else if (!sensor.is_active) {
+                                        pin.classList.add('inactive');
+                                        pin.classList.remove('critical');
+                                        pin.setAttribute('data-status', 'Вимкнений');
+                                    } else {
+                                        pin.classList.remove('critical', 'inactive');
+                                        pin.setAttribute('data-status', 'В нормі');
+                                    }
+                                    const valDisplay = sensor.latest_value !== '—' ? `${sensor.latest_value} ${sensor.unit}` : '—';
+                                    pin.setAttribute('data-value', valDisplay);
+                                }
+                            });
+
+                            if (currentOpenSectorId === String(serverSector.id) && modalOverlay.classList.contains('active')) {
+
+                                mStatus.textContent = serverSector.status_text;
+                                if (serverSector.is_critical) {
+                                    mStatus.className = 'status-badge critical-badge';
+                                    mStatus.style.background = ''; mStatus.style.color = '';
+                                } else {
+                                    mStatus.className = 'status-badge';
+                                }
+
+                                mSensorsList.innerHTML = '';
+                                if (serverSector.sensors_info.length === 0) {
+                                    mSensorsList.innerHTML = '<p class="no-sensors">У цьому секторі ще немає встановлених сенсорів.</p>';
+                                } else {
+                                    serverSector.sensors_info.forEach(sensor => {
+                                        const iconClass = sensor.is_critical ? 'ri-error-warning-line text-danger' : 'ri-checkbox-circle-line text-success';
+                                        const itemClass = sensor.is_critical ? 'sensor-item critical' : 'sensor-item';
+                                        const valueDisplay = sensor.latest_value !== '—' ? `${sensor.latest_value} ${sensor.unit}` : 'Немає даних';
+
+                                        mSensorsList.innerHTML += `
+                                            <div class="${itemClass}">
+                                                <div class="sensor-info">
+                                                    <i class="${iconClass}"></i>
+                                                    <div>
+                                                        <strong>${sensor.type}</strong>
+                                                        <span>${sensor.serial}</span>
+                                                    </div>
+                                                </div>
+                                                <div class="sensor-value-box ${sensor.is_critical ? 'value-critical' : 'value-normal'}">
+                                                    ${valueDisplay}
+                                                </div>
+                                            </div>
+                                        `;
+                                    });
+                                }
+                            }
+                        }
+                    });
+                } catch (error) {
+                    console.error("Помилка AJAX:", error);
+                }
+            }
+
+            setInterval(fetchRealTimeData, 5000);
         }
 
         if (isInteractive) {

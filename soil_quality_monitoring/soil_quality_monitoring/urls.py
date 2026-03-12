@@ -5,6 +5,7 @@ from django.urls import path, include
 from django.views.generic import TemplateView
 
 from farm_monitoring.views import crops, api, sensors, sectors
+from farm_monitoring.views.sectors import api_realtime_measurements
 
 urlpatterns = [
     path('', sectors.SectorListView.as_view(), name="dashboard"),
@@ -25,6 +26,7 @@ urlpatterns = [
     # Measurements urls
     path('api/sensors', api.get_active_sensors, name='get_sensors'),
     path('api/measurement', api.add_measurement, name='api_add_measurement'),
+    path('api/sectors/realtime/', api_realtime_measurements, name='api_realtime_sectors'),
     path('admin/', admin.site.urls),
 ]
 
