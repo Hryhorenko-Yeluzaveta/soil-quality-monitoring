@@ -23,6 +23,7 @@
     <link rel="stylesheet" href="{% static 'css/sensor_list.css' %}">
     <link rel="stylesheet" href="{% static 'css/sensor_create.css' %}">
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'css/toast.css' %}">
 </head>
 <body>
     {% include 'components/sidebar.html' %}
@@ -33,6 +34,17 @@
     </div>
 
     <div class="overlay" id="overlay"></div>
+
+    <div id="critical-toast" class="toast-notification">
+        <div class="toast-icon">
+            <i class="ri-alarm-warning-fill"></i>
+        </div>
+        <div class="toast-content">
+            <h4>Критична ситуація!</h4>
+            <p id="toast-message">Показники сенсорів вийшли за межі норми. Необхідне негайне втручання.</p>
+        </div>
+        <button id="close-toast-btn" class="toast-close-btn"><i class="ri-close-line"></i></button>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -46,6 +58,57 @@
             }
             if (toggleBtn) toggleBtn.addEventListener('click', toggleMenu);
             if (overlay) overlay.addEventListener('click', toggleMenu);
+
+            const toast = document.getElementById('critical-toast');
+            const toastMsg = document.getElementById('toast-message');
+            const closeToastBtn = document.getElementById('close-toast-btn');
+
+            function showToast(message) {
+                if (message) toastMsg.textContent = message;
+                toast.classList.add('show');
+            }
+
+            if (closeToastBtn) {
+                closeToastBtn.addEventListener('click', () => {
+                    toast.classList.remove('show');
+                });
+            }
+
+            async function fetchRealtimeSensors() {
+                try {
+                    const response = await fetch('/api/sectors/realtime/');
+                    if (!response.ok) return;
+
+                    const data = await response.json();
+                    const sectors = data.sectors || [];
+
+                    let criticalSensors = [];
+
+                    sectors.forEach(sector => {
+                        if (sector.is_critical) {
+                            sector.sensors_info.forEach(sensor => {
+                                if (sensor.is_critical) {
+                                    criticalSensors.push(`${sensor.serial} (${sensor.type}: ${sensor.latest_value} ${sensor.unit})`);
+                                }
+                            });
+                        }
+                    });
+
+                    if (criticalSensors.length > 0) {
+                        const message = `Поза нормою: ${criticalSensors.join(', ')}!`;
+                        showToast(message);
+                    } else {
+                        toast.classList.remove('show');
+                    }
+
+                } catch (error) {
+                    console.error("Помилка при отриманні даних сенсорів:", error);
+                }
+            }
+
+            setInterval(fetchRealtimeSensors, 30000);
+
+            fetchRealtimeSensors();
         });
     </script>
 </body>
