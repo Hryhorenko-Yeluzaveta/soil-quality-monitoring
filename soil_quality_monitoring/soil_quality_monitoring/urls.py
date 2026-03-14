@@ -8,7 +8,8 @@ from farm_monitoring.views import crops, api, sensors, sectors
 from farm_monitoring.views.sectors import api_realtime_measurements
 
 urlpatterns = [
-    path('', sectors.SectorListView.as_view(), name="dashboard"),
+    path('', TemplateView.as_view(template_name='index.html'), name='index'),
+    path('dashboard/', sectors.SectorListView.as_view(), name="dashboard"),
     # Crops urls
     path('crops/', crops.CropListView.as_view(), name='crops'),
     path('crops/create', crops.CropCreateView.as_view()),

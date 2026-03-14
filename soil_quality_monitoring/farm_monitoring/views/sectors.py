@@ -88,7 +88,7 @@ def api_realtime_measurements(request):
     return JsonResponse({'sectors': response_data})
 
 class SectorListView(ListView):
-    template_name = 'index.html'
+    template_name = 'dashboard.html'
     context_object_name = 'sectors'
 
     def get_queryset(self):

@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Головна - Карта фермы | SmartFarm{% endblock %}
+
+{% block body %}
+    <div class="dashboard-header">
+        <div class="header-title">
+            <h1>Мапа ферми</h1>
+        </div>
+        <div class="header-actions">
+            <a href="{% url 'sector_create' %}" class="btn-primary">
+                <i class="ri-add-line"></i> Додати сектор
+            </a>
+        </div>
+    </div>
+
+    {% include 'components/farm_map.html' with is_interactive=False sectors=sectors %}
+    {% include 'components/delete_modal.html' %}
+{% endblock %}
