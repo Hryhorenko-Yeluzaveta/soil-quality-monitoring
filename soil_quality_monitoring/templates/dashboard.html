@@ -8,11 +8,13 @@
         <div class="header-title">
             <h1>Мапа ферми</h1>
         </div>
+        {% if user.is_admin %}
         <div class="header-actions">
             <a href="{% url 'sector_create' %}" class="btn-primary">
                 <i class="ri-add-line"></i> Додати сектор
             </a>
         </div>
+        {% endif %}
     </div>
 
     {% include 'components/farm_map.html' with is_interactive=False sectors=sectors %}

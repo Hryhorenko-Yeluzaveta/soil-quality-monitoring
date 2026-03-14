@@ -6,10 +6,12 @@
 {% block body %}
     <div class="page-header">
         <h1>Сенсори</h1>
+        {% if user.is_admin %}
         <a href="create" class="btn-primary">
             <i class="ri-add-line"></i>
             <span>Додати сенсор</span>
         </a>
+        {% endif %}
     </div>
 
     <div class="controls-row">
@@ -87,6 +89,7 @@
                         {% endif %}
                     </div>
 
+                    {% if user.is_admin %}
                     <div class="sensor-actions">
                         <a class="btn-icon edit" href="update/{{ sensor.pk }}" title="Редагувати">
                             <i class="ri-pencil-line"></i>
@@ -98,6 +101,7 @@
                             <i class="ri-delete-bin-line"></i>
                         </button>
                     </div>
+                    {% endif %}
                 </div>
             {% endfor %}
         {% else %}

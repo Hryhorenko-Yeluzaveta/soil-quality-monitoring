@@ -6,10 +6,12 @@
 {% block body %}
     <div class="page-header">
         <h1>Культури</h1>
+        {% if user.is_admin %}
         <a href="/crops/create" class="btn-primary">
             <i class="ri-add-line"></i>
             <span>Додати культуру</span>
         </a>
+        {% endif %}
     </div>
     <div class="controls-row">
 
@@ -76,6 +78,7 @@
                         </div>
                     </div>
 
+                    {% if user.is_admin %}
                     <div class="crop-actions">
                         <a class="btn-icon edit" href="{% url 'crop_update' crop.pk %}" title="Редагувати">
                             <i class="ri-pencil-line"></i>
@@ -87,6 +90,7 @@
                             <i class="ri-delete-bin-line"></i>
                         </button>
                     </div>
+                    {% endif %}
                 </article>
             {% endfor %}
         {% else %}

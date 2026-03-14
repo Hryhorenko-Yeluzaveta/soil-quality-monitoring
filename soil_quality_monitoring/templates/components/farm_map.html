@@ -101,11 +101,12 @@
                 <div id="modal-sensors-list" class="sector-sensors-list">
                 </div>
             </div>
-
+            {% if user.is_admin %}
             <div class="modal-footer">
                 <a href="#" id="modal-edit-btn" class="btn-secondary"><i class="ri-pencil-line"></i> Редагувати</a>
                 <a href="#" id="modal-delete-btn" class="btn-danger"><i class="ri-delete-bin-line"></i> Видалити</a>
             </div>
+            {% endif %}
         </div>
     </div>
 {% endif %}
@@ -235,13 +236,15 @@
                     console.error("Помилка парсингу сенсорів", e);
                 }
 
-                mEditBtn.href = `/sectors/update/${sectorId}`;
-                mDeleteBtn.onclick = function(e) {
-                    e.preventDefault();
-                    closeModal();
-                    const sectorName = sectorElem.getAttribute('data-name');
-                    openDeleteModal(`/sectors/delete/${sectorId}`, sectorName);
-                };
+                if (mEditBtn && mDeleteBtn) {
+                    mEditBtn.href = `/sectors/update/${sectorId}`;
+                    mDeleteBtn.onclick = function(e) {
+                        e.preventDefault();
+                        closeModal();
+                        const sectorName = sectorElem.getAttribute('data-name');
+                        openDeleteModal(`/sectors/delete/${sectorId}`, sectorName);
+                    };
+                }
 
                 tooltip.classList.remove('show');
                 modalOverlay.classList.add('active');

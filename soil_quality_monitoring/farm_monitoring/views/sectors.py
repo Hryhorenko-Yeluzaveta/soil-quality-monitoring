@@ -7,6 +7,8 @@ from django.views.generic import CreateView, UpdateView, ListView, DeleteView
 
 from farm_monitoring.forms import SectorCreateForm, SectorUpdateForm
 from farm_monitoring.models import Sector, Measurement, Sensor
+from farm_monitoring.views.users import AdminRequiredMixin
+
 
 def get_annotated_sectors():
     latest_measurement_subquery = Measurement.objects.filter(
@@ -96,7 +98,7 @@ class SectorListView(LoginRequiredMixin, ListView):
         return get_annotated_sectors()
 
 
-class SectorCreateView(LoginRequiredMixin, CreateView):
+class SectorCreateView(AdminRequiredMixin, CreateView):
     template_name = 'sector_create_update.html'
     model = Sector
     form_class = SectorCreateForm
@@ -108,7 +110,7 @@ class SectorCreateView(LoginRequiredMixin, CreateView):
         return context
 
 
-class SectorUpdateView(LoginRequiredMixin, UpdateView):
+class SectorUpdateView(AdminRequiredMixin, UpdateView):
     template_name = 'sector_create_update.html'
     queryset = Sector.objects.filter(archived=False)
     form_class = SectorUpdateForm
@@ -120,7 +122,7 @@ class SectorUpdateView(LoginRequiredMixin, UpdateView):
         return context
 
 
-class SectorDeleteView(LoginRequiredMixin, DeleteView):
+class SectorDeleteView(AdminRequiredMixin, DeleteView):
     model = Sector
     success_url = reverse_lazy("dashboard")
 

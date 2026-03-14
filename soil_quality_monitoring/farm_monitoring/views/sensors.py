@@ -5,6 +5,7 @@ from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from farm_monitoring.forms import SensorCreateForm, SensorUpdateForm
 
 from farm_monitoring.models import Sensor
+from farm_monitoring.views.users import AdminRequiredMixin
 
 
 class SensorListView(LoginRequiredMixin, ListView):
@@ -46,19 +47,19 @@ class SensorListView(LoginRequiredMixin, ListView):
 
         return context
 
-class SensorCreateView(LoginRequiredMixin, CreateView):
+class SensorCreateView(AdminRequiredMixin, CreateView):
     template_name = 'sensor_create_update.html'
     model = Sensor
     form_class = SensorCreateForm
     success_url = reverse_lazy("sensors")
 
-class SensorUpdateView(LoginRequiredMixin, UpdateView):
+class SensorUpdateView(AdminRequiredMixin, UpdateView):
     template_name = 'sensor_create_update.html'
     queryset = Sensor.objects.filter(archived=False)
     form_class = SensorUpdateForm
     success_url = reverse_lazy("sensors")
 
-class SensorDeleteView(LoginRequiredMixin, DeleteView):
+class SensorDeleteView(AdminRequiredMixin, DeleteView):
     model = Sensor
     success_url = reverse_lazy("sensors")
 
