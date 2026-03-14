@@ -125,7 +125,7 @@ class SensorCreateForm(forms.ModelForm):
             'sector': forms.Select(attrs={'class': 'form-control'}),
             'serial_number': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Наприклад: SN-A1-2024'
+                'placeholder': 'Наприклад: SN-HUM-1'
             }),
             'offset_x': forms.NumberInput(attrs={
                 'class': 'form-control',

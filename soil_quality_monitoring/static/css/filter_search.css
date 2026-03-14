@@ -143,6 +143,7 @@
 /* Пошук культури у формі створення сектору */
 .custom-autocomplete-group {
     position: relative;
+    z-index: 1000;
 }
 
 .search-input-wrapper {
@@ -186,7 +187,6 @@
     top: 100%;
     left: 0;
     right: 0;
-    z-index: 100;
     background: #fff;
     border: 1px solid #e0e0e0;
     border-radius: 10px;

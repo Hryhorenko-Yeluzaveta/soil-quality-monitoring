@@ -1,0 +1,158 @@
+/* Сторінка авторизації */
+.login-body {
+    background-color: var(--bg-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 420px;
+}
+
+.login-card {
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 40px 30px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.logo-circle {
+    width: 64px;
+    height: 64px;
+    background-color: color-mix(in srgb, var(--sidebar-bg) 15%, transparent);
+    color: var(--sidebar-bg);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    margin: 0 auto 16px auto;
+}
+
+.login-header h2 {
+    color: #2c2c2c;
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+}
+
+.login-header p {
+    color: #888;
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.input-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 8px;
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 14px;
+    color: #aaa;
+    font-size: 1.1rem;
+    pointer-events: none;
+    transition: color var(--transition-speed);
+}
+
+.input-wrapper input {
+    width: 100%;
+    padding: 14px 40px 14px 42px;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    background-color: #fcfcfc;
+    font-family: var(--font-main);
+    font-size: 0.95rem;
+    color: #333;
+    transition: all var(--transition-speed);
+    outline: none;
+}
+
+.input-wrapper input:focus {
+    border-color: var(--sidebar-bg);
+    background-color: #fff;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--sidebar-bg) 15%, transparent);
+}
+
+.input-wrapper input:focus + .input-icon,
+.input-wrapper input:focus ~ .input-icon {
+    color: var(--sidebar-bg);
+}
+
+.toggle-password {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    color: #aaa;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color var(--transition-speed);
+}
+
+.toggle-password:hover {
+    color: var(--sidebar-bg);
+}
+
+.login-btn {
+    background-color: var(--sidebar-bg);
+    color: var(--text-light);
+    border: none;
+    border-radius: 12px;
+    padding: 15px;
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: var(--font-main);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 10px;
+    transition: background-color var(--transition-speed), transform 0.1s;
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--sidebar-bg) 30%, transparent);
+}
+
+.login-btn:hover {
+    background-color: var(--sidebar-hover);
+}
+
+.login-btn:active {
+    transform: scale(0.98);
+}
+
+@media (max-width: 480px) {
+    .login-card {
+        padding: 30px 20px;
+    }
+}

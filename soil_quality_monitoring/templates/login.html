@@ -1,10 +1,82 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вхід у систему | SmartFarm</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="{% static 'css/general.css' %}">
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
 </head>
-<body>
-    <h1>Login Page</h1>
+<body class="login-body">
+
+    <div class="login-container">
+        <div class="login-card">
+
+            <div class="login-header">
+                <div class="logo-circle">
+                    <i class="ri-leaf-line"></i>
+                </div>
+                <h2>Вітаємо!</h2>
+                <p>Увійдіть до свого облікового запису</p>
+            </div>
+
+            <form method="post" action="" class="login-form">
+                {% csrf_token %}
+
+                <div class="input-group">
+                    <label for="username">Логін</label>
+                    <div class="input-wrapper">
+                        <i class="ri-user-3-line input-icon"></i>
+                        <input type="text" id="username" name="username" placeholder="Введіть ваш логін" required autocomplete="username">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="password">Пароль</label>
+                    <div class="input-wrapper">
+                        <i class="ri-lock-password-line input-icon"></i>
+                        <input type="password" id="password" name="password" placeholder="Введіть ваш пароль" required autocomplete="current-password">
+                        <button type="button" class="toggle-password" id="togglePassword">
+                            <i class="ri-eye-off-line"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="login-btn">
+                    Увійти <i class="ri-arrow-right-line"></i>
+                </button>
+            </form>
+
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const togglePassword = document.getElementById('togglePassword');
+            const passwordInput = document.getElementById('password');
+
+            if (togglePassword && passwordInput) {
+                togglePassword.addEventListener('click', function() {
+                    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                    passwordInput.setAttribute('type', type);
+
+                    const icon = this.querySelector('i');
+                    if (type === 'text') {
+                        icon.classList.remove('ri-eye-off-line');
+                        icon.classList.add('ri-eye-line');
+                    } else {
+                        icon.classList.remove('ri-eye-line');
+                        icon.classList.add('ri-eye-off-line');
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>
