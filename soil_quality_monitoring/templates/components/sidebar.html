@@ -15,7 +15,7 @@
     <nav class="sidebar-nav">
         <ul>
             <li>
-                <a href="{% url 'dashboard' %}" class="nav-link">
+                <a href="{% url 'dashboard' %}" class="nav-link {% if '/dashboard' in request.path %}active{% endif %}">
                     <i class="ri-map-2-line"></i>
                     <span>Мапа ферми</span>
                 </a>
@@ -36,7 +36,7 @@
     </nav>
 
     <div class="sidebar-footer">
-        <a href="#" class="nav-link logout">
+        <a href="{% url 'logout' %}" class="nav-link logout">
             <i class="ri-logout-box-line"></i>
             <span>Вийти</span>
         </a>

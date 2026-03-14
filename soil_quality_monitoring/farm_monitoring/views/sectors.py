@@ -1,3 +1,5 @@
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import OuterRef, Subquery, Prefetch
 from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse_lazy
@@ -5,7 +7,6 @@ from django.views.generic import CreateView, UpdateView, ListView, DeleteView
 
 from farm_monitoring.forms import SectorCreateForm, SectorUpdateForm
 from farm_monitoring.models import Sector, Measurement, Sensor
-
 
 def get_annotated_sectors():
     latest_measurement_subquery = Measurement.objects.filter(
@@ -59,7 +60,7 @@ def get_annotated_sectors():
 
     return sectors
 
-
+@login_required
 def api_realtime_measurements(request):
     sectors = get_annotated_sectors()
 
@@ -87,7 +88,7 @@ def api_realtime_measurements(request):
 
     return JsonResponse({'sectors': response_data})
 
-class SectorListView(ListView):
+class SectorListView(LoginRequiredMixin, ListView):
     template_name = 'dashboard.html'
     context_object_name = 'sectors'
 
@@ -95,7 +96,7 @@ class SectorListView(ListView):
         return get_annotated_sectors()
 
 
-class SectorCreateView(CreateView):
+class SectorCreateView(LoginRequiredMixin, CreateView):
     template_name = 'sector_create_update.html'
     model = Sector
     form_class = SectorCreateForm
@@ -107,7 +108,7 @@ class SectorCreateView(CreateView):
         return context
 
 
-class SectorUpdateView(UpdateView):
+class SectorUpdateView(LoginRequiredMixin, UpdateView):
     template_name = 'sector_create_update.html'
     queryset = Sector.objects.filter(archived=False)
     form_class = SectorUpdateForm
@@ -119,7 +120,7 @@ class SectorUpdateView(UpdateView):
         return context
 
 
-class SectorDeleteView(DeleteView):
+class SectorDeleteView(LoginRequiredMixin, DeleteView):
     model = Sector
     success_url = reverse_lazy("dashboard")
 

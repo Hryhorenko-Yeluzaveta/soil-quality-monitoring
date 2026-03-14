@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import path, include
 from django.views.generic import TemplateView
 
@@ -9,6 +10,8 @@ from farm_monitoring.views.sectors import api_realtime_measurements
 
 urlpatterns = [
     path('', TemplateView.as_view(template_name='index.html'), name='index'),
+    path('login/', LoginView.as_view(template_name='login.html', redirect_authenticated_user=True), name='login'),
+    path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
     path('dashboard/', sectors.SectorListView.as_view(), name="dashboard"),
     # Crops urls
     path('crops/', crops.CropListView.as_view(), name='crops'),

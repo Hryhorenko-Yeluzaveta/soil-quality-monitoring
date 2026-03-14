@@ -1,5 +1,35 @@
+from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
+
+class User(AbstractUser):
+    ROLE_ADMIN = 'ADMIN'
+    ROLE_EMPLOYEE = 'EMPLOYEE'
+
+    ROLE_CHOICES = [
+        (ROLE_ADMIN, 'Адміністратор'),
+        (ROLE_EMPLOYEE, 'Співробітник'),
+    ]
+
+    role = models.CharField(
+        max_length=10,
+        choices=ROLE_CHOICES,
+        default=ROLE_EMPLOYEE,
+        verbose_name='Роль'
+    )
+
+    class Meta:
+        verbose_name = 'Користувач'
+        verbose_name_plural = 'Користувачі'
+
+    def __str__(self):
+        return f"{self.username} ({self.get_role_display()})"
+
+    def is_admin(self):
+        return self.role == self.ROLE_ADMIN or self.is_superuser
+
+    def is_employee(self):
+        return self.role == self.ROLE_EMPLOYEE
 
 class Crop(models.Model):
     class Category(models.TextChoices):

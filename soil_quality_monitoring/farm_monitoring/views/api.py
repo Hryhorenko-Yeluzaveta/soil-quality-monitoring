@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 import json
 
@@ -6,6 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 from farm_monitoring.models import Measurement, Sensor
 
 @csrf_exempt
+@login_required
 def add_measurement(request):
     if request.method == 'POST':
         try:
@@ -20,6 +22,7 @@ def add_measurement(request):
             return JsonResponse({"error": str(e)}, status=400)
     return JsonResponse({"error": "Only POST allowed"}, status=405)
 
+@login_required
 def get_active_sensors(request):
     sensors = Sensor.objects.filter(is_active=True, archived=False)
     if not sensors:

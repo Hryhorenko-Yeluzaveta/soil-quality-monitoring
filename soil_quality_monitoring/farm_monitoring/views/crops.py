@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
@@ -5,7 +6,7 @@ from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from farm_monitoring.forms import CropCreateForm, CropUpdateForm
 from farm_monitoring.models import Crop
 
-class CropListView(ListView):
+class CropListView(LoginRequiredMixin, ListView):
     template_name = 'crop_list.html'
     paginate_by = 9
     queryset = Crop.objects.filter(archived=False)
@@ -38,19 +39,19 @@ class CropListView(ListView):
             )
         return context
 
-class CropCreateView(CreateView):
+class CropCreateView(LoginRequiredMixin, CreateView):
     template_name = 'crop_create_form.html'
     model = Crop
     form_class = CropCreateForm
     success_url = reverse_lazy("crops")
 
-class CropUpdateView(UpdateView):
+class CropUpdateView(LoginRequiredMixin, UpdateView):
     template_name = 'crop_update_form.html'
     queryset = Crop.objects.filter(archived=False)
     form_class = CropUpdateForm
     success_url = reverse_lazy("crops")
 
-class CropDeleteView(DeleteView):
+class CropDeleteView(LoginRequiredMixin, DeleteView):
     model = Crop
     success_url = reverse_lazy("crops")
 
