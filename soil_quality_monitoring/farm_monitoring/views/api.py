@@ -1,4 +1,4 @@
-from django.contrib.auth.decorators import login_required
+import os
 from django.http import JsonResponse
 import json
 
@@ -7,8 +7,10 @@ from django.views.decorators.csrf import csrf_exempt
 from farm_monitoring.models import Measurement, Sensor
 
 @csrf_exempt
-@login_required
 def add_measurement(request):
+    if request.headers.get('X-API-Key') != os.getenv('IOT_API_KEY'):
+        return JsonResponse({"error": "Unauthorized device"}, status=403)
+
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
@@ -22,8 +24,10 @@ def add_measurement(request):
             return JsonResponse({"error": str(e)}, status=400)
     return JsonResponse({"error": "Only POST allowed"}, status=405)
 
-@login_required
 def get_active_sensors(request):
+    if request.headers.get('X-API-Key') != os.getenv('IOT_API_KEY'):
+        return JsonResponse({"error": "Unauthorized device"}, status=403)
+
     sensors = Sensor.objects.filter(is_active=True, archived=False)
     if not sensors:
         return JsonResponse({"message": "There are no sensors yet"}, status=404)

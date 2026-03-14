@@ -1,9 +1,18 @@
+import os
 import random
 import time
 import requests
+from dotenv import load_dotenv
+
+load_dotenv()
 
 URL_SEND_MEASUREMENT = 'http://127.0.0.1:8000/api/measurement'
 URL_SENSORS = 'http://127.0.0.1:8000/api/sensors'
+HEADERS = {
+    'X-API-Key': os.getenv('IOT_API_KEY'),
+    'Content-Type': 'application/json'
+}
+
 RAIN_PROBABILITY = 0.05
 ENVIRONMENT = {
     'TEMP': 20.0,
@@ -26,7 +35,7 @@ def initialize_sensors():
     ph_states.clear()
     nit_states.clear()
 
-    active_sensors = requests.get(URL_SENSORS).json()['sensors']
+    active_sensors = requests.get(URL_SENSORS, headers=HEADERS).json()['sensors']
     last_values_temp = []
     last_values_hum = []
     for sensor in active_sensors:
@@ -96,7 +105,7 @@ def generate_measurement_nitrogen():
 
 def save_measurement(serial_number, value):
     measurement = {'serial_number': serial_number, 'value': round(value, 2)}
-    res = requests.post(URL_SEND_MEASUREMENT, json=measurement)
+    res = requests.post(URL_SEND_MEASUREMENT, json=measurement, headers=HEADERS)
     if res.status_code != 201:
         print(f"Помилка: {res.text}")
     print(f'Статус: {res.status_code}')
