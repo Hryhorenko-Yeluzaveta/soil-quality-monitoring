@@ -29,6 +29,11 @@
             <form method="post" action="" class="login-form">
                 {% csrf_token %}
 
+                {% if form.errors %}
+                    <div class="error-message">
+                        Неправильний логін або пароль.
+                    </div>
+                {% endif %}
                 <div class="input-group">
                     <label for="username">Логін</label>
                     <div class="input-wrapper">

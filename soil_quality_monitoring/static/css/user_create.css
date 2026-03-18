@@ -1,0 +1,40 @@
+.form-errors-wrapper {
+    margin-bottom: 15px;
+}
+
+.form-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.form-row-2.offset-top {
+    margin-top: 5px;
+}
+
+.form-divider {
+    border: 0;
+    border-top: 1px solid #f0f0f0;
+}
+
+.section-title.personal-title {
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+.section-title.security-title {
+    margin: 0 0 5px 0;
+}
+
+.security-hint {
+    font-size: 0.85rem;
+    color: #888;
+    margin-bottom: 15px;
+}
+
+@media (max-width: 768px) {
+    .form-row-2 {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+}

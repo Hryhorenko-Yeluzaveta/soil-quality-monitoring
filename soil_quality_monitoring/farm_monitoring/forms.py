@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Crop, Sensor, Sector
+from .models import Crop, Sensor, Sector, User
 
 
 class CropCreateForm(forms.ModelForm):
@@ -270,3 +270,68 @@ class SectorCreateForm(forms.ModelForm):
 
 class SectorUpdateForm(SectorCreateForm):
     pass
+
+class UserForm(forms.ModelForm):
+    password = forms.CharField(
+        label='Пароль',
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Введіть пароль'}),
+        required=False,
+        error_messages = {
+            'required': "Будь ласка, введіть пароль."
+        }
+    )
+    password_confirm = forms.CharField(
+        label='Підтвердження пароля',
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Повторіть пароль'}),
+        required=False,
+        error_messages={
+            'required': "Будь ласка, підтвердіть пароль."
+        }
+    )
+
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'first_name', 'last_name']
+
+        widgets = {
+            'username': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'first_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+
+        error_messages = {
+            'username': {
+                'unique': "Користувач з таким логіном вже існує.",
+                'required': "Будь ласка, введіть логін.",
+            }
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.instance.pk:
+            self.fields['password'].required = True
+            self.fields['password_confirm'].required = True
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get("password")
+        password_confirm = cleaned_data.get("password_confirm")
+
+        if password or password_confirm:
+            if password != password_confirm:
+                self.add_error('password_confirm', "Паролі не співпадають. Спробуйте ще раз.")
+
+        return cleaned_data
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+
+        password = self.cleaned_data.get("password")
+        if password:
+            user.set_password(password)
+
+        if commit:
+            user.save()
+
+        return user

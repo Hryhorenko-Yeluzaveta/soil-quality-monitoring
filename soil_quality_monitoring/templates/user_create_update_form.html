@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/user_form.css' %}">
+{% endblock %}
+
+{% block title %}
+    {% if form.instance.pk %}Редагувати користувача{% else %}Додати користувача{% endif %} | SmartFarm
+{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <div class="header-title">
+        <a href="{% url 'users' %}" class="back-link"><i class="ri-arrow-left-line"></i></a>
+        <h1>{% if form.instance.pk %}Редагувати користувача{% else %}Додати нового користувача{% endif %}</h1>
+    </div>
+</div>
+
+<div class="form-container">
+    <form method="post" class="user-form" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="form-errors-wrapper">
+                {% for error in form.non_field_errors %}
+                    <div class="error-message">{{ error }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="main-info-inputs">
+            <h3 class="section-title personal-title">Особисті дані</h3>
+
+            <div class="form-row-2">
+                <div class="form-group">
+                    <label for="{{ form.username.id_for_label }}">Логін</label>
+                    {{ form.username }}
+                    {% for error in form.username.errors %}
+                        <div class="error-message">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.email.id_for_label }}">Email</label>
+                    {{ form.email }}
+                    {% for error in form.email.errors %}
+                        <div class="error-message">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="form-row-2 offset-top">
+                <div class="form-group">
+                    <label for="{{ form.first_name.id_for_label }}">Ім'я</label>
+                    {{ form.first_name }}
+                    {% for error in form.first_name.errors %}
+                        <div class="error-message">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.last_name.id_for_label }}">Прізвище</label>
+                    {{ form.last_name }}
+                    {% for error in form.last_name.errors %}
+                        <div class="error-message">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <hr class="form-divider">
+
+            <h3 class="section-title security-title">Безпека</h3>
+            {% if form.instance.pk %}
+                <p class="security-hint">
+                    Залиште поля паролів порожніми, якщо не хочете його змінювати.
+                </p>
+            {% endif %}
+
+            <div class="form-row-2">
+                <div class="form-group">
+                    <label for="{{ form.password.id_for_label }}">Пароль</label>
+                    {{ form.password }}
+                    {% for error in form.password.errors %}
+                        <div class="error-message">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.password_confirm.id_for_label }}">Підтвердження пароля</label>
+                    {{ form.password_confirm }}
+                    {% for error in form.password_confirm.errors %}
+                        <div class="error-message">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="{% url 'users' %}" class="btn-secondary">Скасувати</a>
+            <button type="submit" class="btn-submit">
+                {% if form.instance.pk %}Зберегти зміни{% else %}Створити користувача{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -5,13 +5,17 @@ from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import path, include
 from django.views.generic import TemplateView
 
-from farm_monitoring.views import crops, api, sensors, sectors
+from farm_monitoring.views import crops, api, sensors, sectors, users
 from farm_monitoring.views.sectors import api_realtime_measurements
 
 urlpatterns = [
     path('', TemplateView.as_view(template_name='index.html'), name='index'),
     path('login/', LoginView.as_view(template_name='login.html', redirect_authenticated_user=True), name='login'),
     path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
+    path('users/', users.UserListView.as_view(), name='users'),
+    path('users/delete/<int:pk>', users.UserDeleteView.as_view(), name='user_delete'),
+    path('users/create/', users.UserCreateView.as_view(), name='user_create'),
+    path('users/update/<int:pk>', users.UserUpdateView.as_view(), name='user_update'),
     path('dashboard/', sectors.SectorListView.as_view(), name="dashboard"),
     # Crops urls
     path('crops/', crops.CropListView.as_view(), name='crops'),

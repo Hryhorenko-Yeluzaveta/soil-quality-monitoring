@@ -32,6 +32,14 @@
                     <span>Сенсори</span>
                 </a>
             </li>
+        {% if user.is_admin %}
+            <li>
+                <a href="/users" class="nav-link {% if '/users' in request.path %}active{% endif %}">
+                    <i class="ri-user-3-fill"></i>
+                    <span>Співробітники</span>
+                </a>
+            </li>
+        {% endif %}
         </ul>
     </nav>
 

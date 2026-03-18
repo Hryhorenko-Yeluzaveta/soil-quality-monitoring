@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Список користувачів | SmartFarm{% endblock %}
+
+{% block body %}
+    <div class="page-header">
+        <h1>Користувачі</h1>
+        {% if user.is_admin %}
+        <a href="{% url 'user_create' %}" class="btn-primary">
+            <i class="ri-user-add-line"></i>
+            <span>Додати користувача</span>
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="controls-row">
+        <div class="filter-section">
+            <div class="filter-scroll">
+                <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.active_only %}active_only={{ request.GET.active_only }}{% endif %}" class="filter-pill {% if not selected_role %}active{% endif %}">
+                    Всі
+                </a>
+
+                {% for role_code, role_name in roles %}
+                    <a href="?role={{ role_code }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.active_only %}&active_only={{ request.GET.active_only }}{% endif %}" class="filter-pill {% if selected_role == role_code %}active{% endif %}">
+                        {{ role_name }}
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="controls-right">
+            <form method="get" style="display: inline-block; margin-right: 15px;">
+                {% if request.GET.role %}<input type="hidden" name="role" value="{{ request.GET.role }}">{% endif %}
+                {% if request.GET.q %}<input type="hidden" name="q" value="{{ request.GET.q }}">{% endif %}
+
+                <label class="toggle-checkbox">
+                    <input type="checkbox"
+                           name="active_only"
+                           value="true"
+                           onchange="this.form.submit()"
+                           {% if request.GET.active_only == 'true' %}checked{% endif %}>
+                    <span>Тільки активні</span>
+                </label>
+            </form>
+
+            {% include 'components/search.html' %}
+        </div>
+    </div>
+
+    {% if messages %}
+        <div class="messages-container" style="margin-bottom: 15px;">
+            {% for message in messages %}
+                <div class="error-message">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="users-list">
+        {% if page_obj %}
+            {% for person in page_obj %}
+                <div class="user-row">
+                    <div class="user-icon">
+                        {% if person.role == 'ADMIN' %}<i class="ri-shield-star-line"></i>
+                        {% elif person.role == 'MANAGER' %}<i class="ri-briefcase-line"></i>
+                        {% else %}<i class="ri-user-line"></i>{% endif %}
+                    </div>
+
+                    <div class="user-info-group main-info">
+                        <span class="user-username">{{ person.username }}</span>
+                        <span class="user-fullname">
+                            {% if person.first_name or person.last_name %}
+                                {{ person.first_name }} {{ person.last_name }}
+                            {% else %}
+                                Без імені
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <div class="user-info-group email-info" title="Електронна пошта">
+                        <i class="ri-mail-line"></i>
+                        <span>{{ person.email|default:"Немає email" }}</span>
+                    </div>
+
+                    <div class="user-info-group role-info" title="Роль у системі">
+                        <i class="ri-group-line"></i>
+                        <span>{{ person.get_role_display|default:person.role }}</span>
+                    </div>
+
+                    <div class="user-info-group status-info">
+                        {% if person.is_active %}
+                            <span class="badge badge-active">Активний</span>
+                        {% else %}
+                            <span class="badge badge-inactive">Звільнений</span>
+                        {% endif %}
+                    </div>
+
+                    {% if user.is_admin %}
+                    <div class="user-actions">
+                        <a class="btn-icon edit" href="{% url 'user_update' person.pk %}" title="Редагувати">
+                            <i class="ri-pencil-line"></i>
+                        </a>
+                        <button type="button"
+                                class="btn-icon delete"
+                                title="Деактивувати"
+                                onclick="openDeleteModal('{% url 'user_delete' person.pk %}', '{{ person.username|escapejs }}')">
+                            <i class="ri-delete-bin-line"></i>
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>Користувачів поки що немає.</p>
+        {% endif %}
+    </div>
+
+    {% include 'components/pagination.html' %}
+    {% include 'components/delete_modal.html' %}
+
+{% endblock %}
