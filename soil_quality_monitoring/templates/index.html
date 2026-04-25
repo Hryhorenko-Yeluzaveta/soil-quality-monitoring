@@ -1,11 +1,390 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uk">
 <head>
-  <meta charset="UTF-8">
-  <title>SmartFarm | Інфо про ферму</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartFarm — Свіжа фермерська продукція</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/landing.css' %}">
 </head>
 <body>
-    <h1>SmartFarm</h1>
-    <p>Історія ферми, вирощувані культури...</p>
+
+<nav class="navbar" id="navbar">
+    <a href="/" class="navbar-logo">
+        <div class="logo-icon"><i class="ri-plant-line"></i></div>
+        <div class="logo-text"><span>Smart</span>Farm</div>
+    </a>
+
+    <ul class="navbar-links">
+        <li><a href="#about">Про нас</a></li>
+        <li><a href="#products">Продукція</a></li>
+        <li><a href="#tech">Наша технологія</a></li>
+        <li><a href="#contacts">Контакти</a></li>
+    </ul>
+
+    <a href="#contacts" class="navbar-cta">
+        <i class="ri-shopping-basket-line"></i> Замовити продукцію
+    </a>
+
+    <button class="burger" id="burger" aria-label="Меню">
+        <i class="ri-menu-4-line"></i>
+    </button>
+</nav>
+
+<section class="hero" id="hero">
+    <img class="hero-bg"
+         src="{% static 'img/hero-farm.jpg' %}"
+         alt="Панорамний вид на поля ферми SmartFarm у сонячний день">
+    <div class="hero-overlay"></div>
+
+    <div class="hero-content">
+        <div class="hero-tag">
+            <i class="ri-leaf-line"></i> Натуральне · Свіже · Екологічне
+        </div>
+        <h1>Вирощено з турботою.<br><span>Перевірено технологіями.</span></h1>
+        <p>SmartFarm — це сімейна ферма, де сучасні IoT-технології допомагають вирощувати найсвіжішу та найкорисніщу продукцію. Кожен овоч і кожна ягода — з ідеального ґрунту.</p>
+        <div class="hero-actions">
+            <a href="#contacts" class="btn-hero-primary">
+                <i class="ri-shopping-basket-line"></i> Замовити продукцію
+            </a>
+            <a href="#products" class="btn-hero-secondary">
+                <i class="ri-arrow-down-circle-line"></i> Наш асортимент
+            </a>
+        </div>
+    </div>
+
+    <div class="hero-scroll">
+        <i class="ri-arrow-down-s-line"></i>
+        <span>Scroll</span>
+    </div>
+</section>
+
+<div class="strip">
+    <div class="strip-item">
+        <i class="ri-calendar-line"></i>
+        <div>
+            <strong>10+ років</strong>
+            <span>На ринку фермерської продукції</span>
+        </div>
+    </div>
+    <div class="strip-divider"></div>
+    <div class="strip-item">
+        <i class="ri-map-2-line"></i>
+        <div>
+            <strong>50 га</strong>
+            <span>Оброблюваних угідь</span>
+        </div>
+    </div>
+    <div class="strip-divider"></div>
+    <div class="strip-item">
+        <i class="ri-seedling-line"></i>
+        <div>
+            <strong>20+ культур</strong>
+            <span>Вирощуємо цілий рік</span>
+        </div>
+    </div>
+    <div class="strip-divider"></div>
+    <div class="strip-item">
+        <i class="ri-sensor-line"></i>
+        <div>
+            <strong>24/7</strong>
+            <span>Моніторинг якості ґрунту</span>
+        </div>
+    </div>
+</div>
+
+<section class="about" id="about">
+    <div class="about-inner">
+        <div class="about-img-wrap reveal-left">
+            <img src="{% static 'img/about-farm.avif' %}"
+                 alt="Фермери збирають свіжий врожай на полях SmartFarm">
+            <div class="about-float">
+                <div class="fi"><i class="ri-award-line"></i></div>
+                <div>
+                    <strong>Сертифікована якість</strong>
+                    <span>Екологічно чиста продукція</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="about-text reveal-right">
+            <div class="section-label"><i class="ri-home-heart-line"></i> Про нас</div>
+            <h2 class="section-title">Ферма, що виросла разом із технологіями</h2>
+            <p class="section-sub">Ми — сімейна ферма, що понад десять років вирощує чисту продукцію на Полтавщині. Коли з'явились розумні сенсори — ми одними з перших почали їх використовувати. Не для показу, а бо турбуємося про кожну грядку.</p>
+            <ul class="about-list">
+                <li>
+                    <i class="ri-checkbox-circle-line"></i>
+                    <span>Жодних пестицидів понад норму — сенсори підказують, коли ґрунт потребує уваги, а коли рослина і сама справляється.</span>
+                </li>
+                <li>
+                    <i class="ri-checkbox-circle-line"></i>
+                    <span>Збираємо врожай у точний момент зрілості — температура і вологість ґрунту говорять нам, коли час.</span>
+                </li>
+                <li>
+                    <i class="ri-checkbox-circle-line"></i>
+                    <span>Продукція потрапляє до вас протягом 24 годин після збору — зберігаємо максимум смаку та поживних речовин.</span>
+                </li>
+                <li>
+                    <i class="ri-checkbox-circle-line"></i>
+                    <span>Відкрита ферма — запрошуємо на екскурсії та дні відкритих дверей, щоб ви самі побачили як ми працюємо.</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<section class="products" id="products">
+    <div class="section-head centered reveal">
+        <div class="section-label"><i class="ri-store-2-line"></i> Асортимент</div>
+        <h2 class="section-title">Що ми вирощуємо</h2>
+        <p class="section-sub">Свіжа сезонна продукція прямо з грядки. Все вирощено без ГМО на власній землі під постійним контролем якості ґрунту.</p>
+    </div>
+
+    <div class="products-grid">
+        <div class="product-card reveal">
+            <img class="product-img"
+                 src="{% static 'img/products/vegetables.jpg' %}"
+                 alt="Свіжі овочі з ферми SmartFarm — томати, огірки, перець">
+            <span class="product-tag">Сезонне</span>
+            <div class="product-body">
+                <div class="product-cat"><i class="ri-plant-line"></i> Овочі</div>
+                <h3>Свіжі овочі</h3>
+                <p>Томати, огірки, перець, цибуля, часник, морква, буряк — вирощені у відкритому ґрунті з контролем pH та вологості.</p>
+            </div>
+        </div>
+
+        <div class="product-card reveal">
+            <img class="product-img"
+                 src="{% static 'img/products/berries.jpg' %}"
+                 alt="Свіжа полуниця і малина з ягідних плантацій ферми SmartFarm">
+            <span class="product-tag">Ягідний сезон</span>
+            <div class="product-body">
+                <div class="product-cat"><i class="ri-goblet-line"></i> Ягоди</div>
+                <h3>Ягоди</h3>
+                <p>Полуниця, малина, смородина, агрус — вирощуємо на чистому ґрунті з оптимальним рівнем азоту для солодкого смаку.</p>
+            </div>
+        </div>
+
+        <div class="product-card reveal">
+            <img class="product-img"
+                 src="{% static 'img/products/fruits.jpg' %}"
+                 alt="Стиглі яблука та груші з власного саду ферми SmartFarm">
+            <div class="product-body">
+                <div class="product-cat"><i class="ri-apple-line"></i> Фрукти</div>
+                <h3>Фрукти</h3>
+                <p>Яблука, груші, слива, вишня — наш власний сад, де кожне дерево росте на ретельно збалансованому ґрунті.</p>
+            </div>
+        </div>
+
+        <div class="product-card reveal">
+            <img class="product-img"
+                 src="{% static 'img/products/grains.jpg' %}"
+                 alt="Золоте пшеничне поле ферми SmartFarm під час збору врожаю">
+            <div class="product-body">
+                <div class="product-cat"><i class="ri-seedling-line"></i> Зернові</div>
+                <h3>Зернові культури</h3>
+                <p>Пшениця, кукурудза, соняшник — вирощуємо з постійним контролем температури ґрунту та вмісту мікроелементів.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="tech" id="tech">
+    <div class="tech-inner">
+        <div class="reveal-left">
+            <div class="section-label"><i class="ri-cpu-line"></i> Наша технологія</div>
+            <h2 class="section-title">Чому наш ґрунт — кращий ґрунт</h2>
+            <p class="section-sub">Ми не здогадуємось — ми знаємо точно. IoT-сенсори у кожній ділянці контролюють ґрунт цілодобово, а система попереджає нас ще до того, як щось піде не так.</p>
+
+            <div class="tech-cards" style="margin-top: 36px;">
+                <div class="tech-card">
+                    <div class="tech-card-icon"><i class="ri-temp-hot-line"></i></div>
+                    <div>
+                        <h4>Температура ґрунту</h4>
+                        <p>Контролюємо температуру щохвилини. Рослина ніколи не страждає від стресу через перегрів або переохолодження.</p>
+                    </div>
+                </div>
+                <div class="tech-card">
+                    <div class="tech-card-icon"><i class="ri-drop-line"></i></div>
+                    <div>
+                        <h4>Вологість ґрунту</h4>
+                        <p>Зрошення точно у потрібний момент — ні краплею більше. Продукція смачніша, а ресурси не марнуються.</p>
+                    </div>
+                </div>
+                <div class="tech-card">
+                    <div class="tech-card-icon"><i class="ri-flask-line"></i></div>
+                    <div>
+                        <h4>Кислотність pH</h4>
+                        <p>Кожна культура потребує свого pH. Ми підтримуємо ідеальний баланс для максимальної засвоюваності поживних речовин.</p>
+                    </div>
+                </div>
+                <div class="tech-card">
+                    <div class="tech-card-icon"><i class="ri-leaf-line"></i></div>
+                    <div>
+                        <h4>Вміст азоту</h4>
+                        <p>Вносимо добрива лише тоді, коли це справді потрібно. Мінімум хімії — максимум натуральності продукту.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tech-img-wrap reveal-right">
+            <img src="{% static 'img/tech-sensor.webp' %}"
+                 alt="IoT-сенсор SmartFarm вимірює параметри ґрунту на фермерській ділянці">
+        </div>
+    </div>
+</section>
+
+<section class="why">
+    <div class="section-head centered reveal">
+        <div class="section-label"><i class="ri-shield-check-line"></i> Чому ми</div>
+        <h2 class="section-title">Переваги продукції SmartFarm</h2>
+        <p class="section-sub">Ми не просто вирощуємо — ми доводимо якість даними.</p>
+    </div>
+
+    <div class="why-grid">
+        <div class="why-card reveal">
+            <div class="why-icon wi-g"><i class="ri-leaf-line"></i></div>
+            <h3>100% натуральне</h3>
+            <p>Жодних ГМО і синтетичних прискорювачів. Лише природні процеси під контролем точних датчиків.</p>
+        </div>
+        <div class="why-card reveal">
+            <div class="why-icon wi-p"><i class="ri-timer-flash-line"></i></div>
+            <h3>Доставка за 24 години</h3>
+            <p>Від грядки до вашого столу за добу. Свіжість, яку відчуваєш відразу.</p>
+        </div>
+        <div class="why-card reveal">
+            <div class="why-icon wi-o"><i class="ri-bar-chart-2-line"></i></div>
+            <h3>Підтверджена якість</h3>
+            <p>Кожна партія вирощена в ідеальних умовах — показники ґрунту зберігаються в системі. Прозорість від нас до вас.</p>
+        </div>
+        <div class="why-card reveal">
+            <div class="why-icon wi-s"><i class="ri-recycle-line"></i></div>
+            <h3>Відповідальне землеробство</h3>
+            <p>Точне зрошення і мінімум добрив завдяки сенсорам. Турбуємось про землю для наступних поколінь.</p>
+        </div>
+    </div>
+</section>
+
+<section class="contacts" id="contacts">
+    <div class="contacts-inner">
+        <div class="reveal-left">
+            <div class="section-label"><i class="ri-phone-line"></i> Контакти</div>
+            <h2 class="section-title">Замовте свіжу продукцію</h2>
+            <p class="section-sub">Телефонуйте або пишіть — ми відповімо протягом години та узгодимо деталі доставки.</p>
+
+            <div class="contact-items">
+                <div class="contact-item">
+                    <div class="ci"><i class="ri-phone-line"></i></div>
+                    <div>
+                        <h4>Телефон для замовлень</h4>
+                        <a href="tel:+380501234567">+38 (050) 123-45-67</a>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <div class="ci"><i class="ri-smartphone-line"></i></div>
+                    <div>
+                        <h4>Viber / Telegram</h4>
+                        <a href="tel:+380671234567">+38 (067) 123-45-67</a>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <div class="ci"><i class="ri-mail-line"></i></div>
+                    <div>
+                        <h4>Електронна пошта</h4>
+                        <a href="mailto:order@smartfarm.ua">order@smartfarm.ua</a>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <div class="ci"><i class="ri-map-pin-line"></i></div>
+                    <div>
+                        <h4>Адреса ферми</h4>
+                        <p>с. Зелений Гай, Полтавська обл.,<br>вул. Фермерська, 1</p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <div class="ci"><i class="ri-time-line"></i></div>
+                    <div>
+                        <h4>Години роботи</h4>
+                        <p>Пн – Пт: 8:00 – 18:00<br>Сб: 9:00 – 14:00 · Нд: вихідний</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="order-note">
+                <p><strong>Самовивіз та доставка.</strong> Самовивіз з ферми — безкоштовно. Доставка по місту та області — уточнюйте при замовленні. Мінімальне замовлення від 300 грн.</p>
+            </div>
+        </div>
+
+        <div class="contact-map reveal-right">
+            <img src="{% static 'img/farm-map.jpg' %}"
+                 alt="Розташування ферми SmartFarm на карті — с. Зелений Гай, Полтавська область"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <div class="map-placeholder" style="display:none;">
+                <i class="ri-map-pin-2-line"></i>
+                <span>с. Зелений Гай, Полтавська обл.</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer class="footer">
+    <div class="footer-inner">
+        <a href="/" class="footer-logo">
+            <div class="logo-icon"><i class="ri-plant-line"></i></div>
+            <div class="logo-text"><span>Smart</span>Farm</div>
+        </a>
+        <nav class="footer-nav">
+            <a href="#about">Про нас</a>
+            <a href="#products">Продукція</a>
+            <a href="#tech">Технологія</a>
+            <a href="#contacts">Контакти</a>
+        </nav>
+    </div>
+    <p class="footer-copy">© 2025 SmartFarm — Фермерська продукція з душею та технологіями · с. Зелений Гай, Полтавська обл.</p>
+</footer>
+
+<script>
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+        navbar.classList.toggle('scrolled', window.scrollY > 60);
+    }, { passive: true });
+
+    document.getElementById('burger').addEventListener('click', () => {
+        const links = document.querySelector('.navbar-links');
+        const isOpen = links.style.display === 'flex';
+        links.style.display = isOpen ? '' : 'flex';
+        links.style.flexDirection = 'column';
+        links.style.position = 'absolute';
+        links.style.top = '100%';
+        links.style.left = '0';
+        links.style.right = '0';
+        links.style.background = 'rgba(255,255,255,.97)';
+        links.style.padding = '16px 28px 24px';
+        links.style.boxShadow = '0 8px 24px rgba(0,0,0,.08)';
+        if (!isOpen) {
+            links.querySelectorAll('a').forEach(a => {
+                a.style.color = '#333'; a.style.padding = '12px 8px';
+                a.style.borderBottom = '1px solid #f0f0f0';
+            });
+        }
+    });
+
+    const revealEls = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry, i) => {
+            if (entry.isIntersecting) {
+                setTimeout(() => entry.target.classList.add('visible'), i * 90);
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+    revealEls.forEach(el => observer.observe(el));
+</script>
+
 </body>
 </html>
