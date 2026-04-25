@@ -178,7 +178,7 @@
     font-size: 1.2rem;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1190px) {
     .toggle-checkbox {
         padding: 10px 14px;
         flex-shrink: 0;
@@ -215,24 +215,30 @@
         justify-content: flex-end;
     }
 
-    .sensor-info-group.sector-info,
-    .sensor-info-group.crop-info {
-        flex: 1 1 45%;
+    .sensor-info-group.sector-info {
+        flex: 1 1 100%;
         order: 4;
-        margin: 0;
+        margin: 4px 0 0 0;
         padding-left: 0;
     }
 
-    .sensor-info-group.coords-info {
+    .sensor-info-group.crop-info {
         flex: 1 1 100%;
         order: 5;
         margin: 0;
         padding-left: 0;
     }
 
-    .sensor-actions {
+    .sensor-info-group.coords-info {
         flex: 1 1 100%;
         order: 6;
+        margin: 0;
+        padding-left: 0;
+    }
+
+    .sensor-actions {
+        flex: 1 1 100%;
+        order: 7;
         justify-content: flex-end;
         margin-top: 4px;
         padding-top: 12px;
