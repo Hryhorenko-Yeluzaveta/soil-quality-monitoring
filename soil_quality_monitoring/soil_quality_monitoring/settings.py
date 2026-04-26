@@ -67,6 +67,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'farm_monitoring.context_processors.farm_map_background',
             ],
         },
     },
@@ -140,3 +141,10 @@ MEDIA_URL = '/media/'
 AUTH_USER_MODEL = 'farm_monitoring.User'
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'dashboard'
+
+GOOGLE_MAPS_API_KEY = os.getenv('GOOGLE_MAPS_API_KEY', '')
+FARM_MAP_CENTER = (49.695011, 34.488750)
+FARM_MAP_ZOOM = 15
+FARM_MAP_TYPE = 'satellite'
+FARM_MAP_SIZE = (640, 360)
+FARM_MAP_SCALE = 2

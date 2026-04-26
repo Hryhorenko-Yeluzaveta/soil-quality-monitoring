@@ -456,3 +456,61 @@
     50% { transform: translate(-50%, -50%) scale(1.1); }
     100% { transform: translate(-50%, -50%) scale(1); }
 }
+
+.farm-map-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.farm-map-canvas.has-bg {
+    background-color: transparent;
+    border: none;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+}
+
+.farm-map-canvas.has-bg .canvas-grid {
+    background-image:
+        linear-gradient(to right, rgba(255, 255, 255, .08) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, .08) 1px, transparent 1px);
+    z-index: 2;
+}
+
+.farm-map-canvas.has-bg .farm-sector {
+    background-color: color-mix(in srgb, var(--sidebar-bg) 22%, transparent);
+    border: 2.5px solid #fff;
+    outline: 2px solid color-mix(in srgb, var(--sidebar-bg) 85%, transparent);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+}
+
+.farm-map-canvas.has-bg .farm-sector:hover {
+    background-color: color-mix(in srgb, var(--sidebar-bg) 45%, transparent);
+}
+
+.farm-map-canvas.has-bg .farm-sector.critical {
+    background-color: color-mix(in srgb, var(--accent-alert) 32%, transparent);
+    outline-color: color-mix(in srgb, var(--accent-alert) 90%, transparent);
+}
+
+.farm-map-canvas.has-bg .sector-label {
+    color: #fff;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.85), 0 0 2px rgba(0, 0, 0, 0.6);
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.farm-map-canvas.has-bg .sensor-pin {
+    border: 2px solid #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.farm-map-canvas.has-bg .canvas-placeholder-text {
+    background: rgba(0, 0, 0, 0.65);
+    color: #fff;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}

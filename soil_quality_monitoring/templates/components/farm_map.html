@@ -5,8 +5,13 @@
         </p>
     {% endif %}
 
-    <div class="farm-map-canvas" id="farmMap"
+    <div class="farm-map-canvas {% if farm_map_bg_url %}has-bg{% endif %}" id="farmMap"
          {% if is_interactive %}style="cursor: crosshair; touch-action: none;"{% endif %}>
+        {% if farm_map_bg_url %}
+            <img class="farm-map-bg" src="{{ farm_map_bg_url }}"
+                 alt="Супутниковий знімок поля ферми"
+                 loading="lazy" decoding="async">
+        {% endif %}
         <div class="canvas-grid"></div>
 
         {% if not sectors and not is_interactive %}
