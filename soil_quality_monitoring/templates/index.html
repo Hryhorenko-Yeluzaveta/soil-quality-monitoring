@@ -24,6 +24,9 @@
         <li><a href="#products">Продукція</a></li>
         <li><a href="#tech">Наша технологія</a></li>
         <li><a href="#contacts">Контакти</a></li>
+        <li class="mobile-only-cta"><a href="#contacts" class="mobile-cta-link">
+            <i class="ri-shopping-basket-line"></i> Замовити продукцію
+        </a></li>
     </ul>
 
     <a href="#contacts" class="navbar-cta">
@@ -101,7 +104,7 @@
     <div class="about-inner">
         <div class="about-img-wrap reveal-left">
             <img src="{% static 'img/about-farm.avif' %}"
-                 alt="Фермери збирають свіжий врожай на полях SmartFarm">
+                 alt="Фермер збирає свіжий врожай на полях SmartFarm">
             <div class="about-float">
                 <div class="fi"><i class="ri-award-line"></i></div>
                 <div>
@@ -160,7 +163,7 @@
         <div class="product-card reveal">
             <img class="product-img"
                  src="{% static 'img/products/berries.jpg' %}"
-                 alt="Свіжа полуниця і малина з ягідних плантацій ферми SmartFarm">
+                 alt="Свіжа полуниця з ягідних плантацій ферми SmartFarm">
             <span class="product-tag">Ягідний сезон</span>
             <div class="product-body">
                 <div class="product-cat"><i class="ri-goblet-line"></i> Ягоди</div>
@@ -354,24 +357,19 @@
         navbar.classList.toggle('scrolled', window.scrollY > 60);
     }, { passive: true });
 
-    document.getElementById('burger').addEventListener('click', () => {
-        const links = document.querySelector('.navbar-links');
-        const isOpen = links.style.display === 'flex';
-        links.style.display = isOpen ? '' : 'flex';
-        links.style.flexDirection = 'column';
-        links.style.position = 'absolute';
-        links.style.top = '100%';
-        links.style.left = '0';
-        links.style.right = '0';
-        links.style.background = 'rgba(255,255,255,.97)';
-        links.style.padding = '16px 28px 24px';
-        links.style.boxShadow = '0 8px 24px rgba(0,0,0,.08)';
-        if (!isOpen) {
-            links.querySelectorAll('a').forEach(a => {
-                a.style.color = '#333'; a.style.padding = '12px 8px';
-                a.style.borderBottom = '1px solid #f0f0f0';
-            });
-        }
+    const burger = document.getElementById('burger');
+    const navLinks = document.querySelector('.navbar-links');
+
+    burger.addEventListener('click', () => {
+        const isOpen = navLinks.classList.toggle('open');
+        burger.querySelector('i').className = isOpen ? 'ri-close-line' : 'ri-menu-4-line';
+    });
+
+    navLinks.querySelectorAll('a').forEach(a => {
+        a.addEventListener('click', () => {
+            navLinks.classList.remove('open');
+            burger.querySelector('i').className = 'ri-menu-4-line';
+        });
     });
 
     const revealEls = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
