@@ -35,6 +35,7 @@ def get_annotated_sectors():
     for sector in sectors:
         sector.is_critical = False
         crop = sector.crop
+        sector.label_x, sector.label_y = sector.centroid
 
         for sensor in sector.sensors.all():
             sensor.is_critical = False
@@ -85,6 +86,7 @@ def api_realtime_measurements(request):
             'id': sector.id,
             'is_critical': sector.is_critical,
             'status_text': 'Критичний' if sector.is_critical else 'В нормі',
+            'polygon_coords': sector.polygon_coords,
             'sensors_info': sensors_info_list
         })
 
@@ -106,7 +108,7 @@ class SectorCreateView(AdminRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['sectors'] = Sector.objects.filter(archived=False)
+        context['sectors'] = get_annotated_sectors()
         return context
 
 
@@ -118,7 +120,7 @@ class SectorUpdateView(AdminRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['sectors'] = Sector.objects.filter(archived=False).exclude(pk=self.object.pk)
+        context['sectors'] = [s for s in get_annotated_sectors() if s.pk != self.object.pk]
         return context
 
 

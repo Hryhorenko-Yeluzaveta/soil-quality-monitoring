@@ -131,6 +131,88 @@
     margin-top: 6px;
 }
 
+.sensor-placement-block {
+    margin-top: 24px;
+}
+
+.placement-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #2c2c2c;
+    margin: 0 0 12px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+
+.sensor-placement-block .drawing-hint {
+    margin: 0 0 10px 0 !important;
+    padding: 10px 14px;
+    background: color-mix(in srgb, var(--sidebar-bg) 6%, transparent);
+    border-left: 3px solid var(--sidebar-bg);
+    border-radius: 6px;
+    font-size: 0.88rem !important;
+    color: #555 !important;
+    transition: background 0.25s, border-color 0.25s, color 0.25s;
+}
+
+.sensor-placement-block .drawing-hint i {
+    margin-right: 4px;
+}
+
+.sensor-placement-block .drawing-hint.hint-error {
+    background: #fdf3f1;
+    border-left-color: var(--accent-alert);
+    color: var(--accent-alert) !important;
+    font-weight: 500;
+}
+
+.sensor-placement-block .drawing-hint.hint-success {
+    background: #f1f7ed;
+    border-left-color: #4caf50;
+    color: #2e7d32 !important;
+    font-weight: 500;
+}
+
+.sensor-placement-block .drawing-hint strong {
+    color: inherit;
+}
+
+.empty-map-warning {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    background: #fdf3f1;
+    border-left: 3px solid var(--accent-alert);
+    border-radius: 6px;
+    color: var(--accent-alert);
+    font-size: 0.92rem;
+    margin-bottom: 10px;
+}
+
+.empty-map-warning i {
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+
+.empty-map-warning a {
+    color: var(--accent-alert);
+    text-decoration: underline;
+    font-weight: 600;
+}
+
+polygon.farm-sector.hover-target {
+    fill: color-mix(in srgb, var(--sidebar-bg) 50%, transparent);
+    stroke-width: 3;
+}
+
+.farm-map-canvas.has-bg polygon.farm-sector.hover-target {
+    fill: color-mix(in srgb, var(--sidebar-bg) 55%, transparent);
+    stroke: var(--accent-alert);
+    stroke-width: 3;
+}
+
 @media (max-width: 768px) {
     .form-row {
         flex-direction: column;
@@ -154,7 +236,6 @@
     }
 }
 
-/* Тултіп для кнопки активації сенсору */
 .status-toggle-container {
     position: relative;
 }

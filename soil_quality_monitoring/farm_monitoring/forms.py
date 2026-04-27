@@ -1,4 +1,7 @@
+import json
+
 from django import forms
+from shapely.geometry import Point, Polygon
 
 from .models import Crop, Sensor, Sector, User
 
@@ -114,6 +117,16 @@ class SensorCreateForm(forms.ModelForm):
             self.add_error('is_active',
                            "Сенсор не може бути активним без прив'язки до сектора. Вимкніть його або оберіть сектор.")
 
+        if sector and offset_x is not None and offset_y is not None and sector.polygon_coords:
+            poly = Polygon(sector.polygon_coords)
+            point = Point(offset_x, offset_y)
+            if poly.is_valid and not poly.contains(point) and not poly.touches(point):
+                self.add_error(
+                    'offset_x',
+                    f"Сенсор має бути встановлений всередині сектора «{sector.name}». "
+                    f"Натисніть на мапі в межах підсвіченого полігону."
+                )
+
         return cleaned_data
 
     class Meta:
@@ -127,18 +140,8 @@ class SensorCreateForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Наприклад: SN-HUM-1'
             }),
-            'offset_x': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'step': '0.1',
-                'min': '0',
-                'max': '100'
-            }),
-            'offset_y': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'step': '0.1',
-                'min': '0',
-                'max': '100'
-            }),
+            'offset_x': forms.HiddenInput(attrs={'id': 'id_offset_x'}),
+            'offset_y': forms.HiddenInput(attrs={'id': 'id_offset_y'}),
             'is_active': forms.CheckboxInput(),
         }
 
@@ -151,11 +154,11 @@ class SensorCreateForm(forms.ModelForm):
                 'max_length': "Серійний номер занадто довгий.",
             },
             'offset_x': {
-                'required': "Вкажіть координату X.",
+                'required': "Натисніть на мапі, щоб встановити сенсор.",
                 'invalid': "Введіть коректне число."
             },
             'offset_y': {
-                'required': "Вкажіть координату Y.",
+                'required': "Натисніть на мапі, щоб встановити сенсор.",
                 'invalid': "Введіть коректне число."
             }
         }
@@ -166,6 +169,17 @@ class SensorUpdateForm(SensorCreateForm):
         pass
 
 class SectorCreateForm(forms.ModelForm):
+    polygon_coords = forms.CharField(
+        widget=forms.HiddenInput(attrs={'id': 'id_polygon_coords'}),
+        required=True,
+        error_messages={'required': "Намалюйте сектор на мапі."},
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk and self.instance.polygon_coords:
+            self.fields['polygon_coords'].initial = json.dumps(self.instance.polygon_coords)
+
     def clean_name(self):
         name = self.cleaned_data.get('name')
 
@@ -179,70 +193,77 @@ class SectorCreateForm(forms.ModelForm):
 
         return name
 
+    def clean_polygon_coords(self):
+        raw = self.cleaned_data.get('polygon_coords')
+        if not raw:
+            raise forms.ValidationError("Намалюйте сектор на мапі.")
+
+        try:
+            coords = json.loads(raw)
+        except (TypeError, ValueError):
+            raise forms.ValidationError("Некоректний формат координат полігону.")
+
+        if not isinstance(coords, list) or len(coords) < 3:
+            raise forms.ValidationError("Сектор повинен мати щонайменше 3 точки.")
+
+        normalized = []
+        for point in coords:
+            if not (isinstance(point, (list, tuple)) and len(point) == 2):
+                raise forms.ValidationError("Некоректний формат точки полігону.")
+            try:
+                x, y = float(point[0]), float(point[1])
+            except (TypeError, ValueError):
+                raise forms.ValidationError("Координати точки повинні бути числами.")
+            if not (0 <= x <= 100 and 0 <= y <= 100):
+                raise forms.ValidationError("Координати точки повинні бути від 0 до 100%.")
+            normalized.append([x, y])
+
+        return normalized
+
     def clean(self):
         cleaned_data = super().clean()
-
-        x_start = cleaned_data.get('x_start')
-        y_start = cleaned_data.get('y_start')
-        width = cleaned_data.get('width')
-        height = cleaned_data.get('height')
-
-        fields_to_check = {
-            'x_start': 'Позиція X',
-            'y_start': 'Позиція Y',
-            'width': 'Ширина',
-            'height': 'Висота'
-        }
-
-        for field, label in fields_to_check.items():
-            val = cleaned_data.get(field)
-            if val is not None and (val < 0 or val > 100):
-                self.add_error(field, f"{label} має бути в межах від 0 до 100%.")
-
-        if None in (x_start, y_start, width, height):
+        coords = cleaned_data.get('polygon_coords')
+        if not coords:
             return cleaned_data
 
-        new_x_end = x_start + width
-        new_y_end = y_start + height
+        new_poly = Polygon(coords)
+        if not new_poly.is_valid:
+            self.add_error('polygon_coords', "Полігон не може перетинати самого себе.")
+            return cleaned_data
 
-        if new_x_end > 100:
-            self.add_error('width', "Ділянка виходить за праву межу карти (X + Ширина > 100%).")
-
-        if new_y_end > 100:
-            self.add_error('height', "Ділянка виходить за нижню межу карти (Y + Висота > 100%).")
-
-        existing_sectors = Sector.objects.filter(archived=False)
-
+        existing = Sector.objects.filter(archived=False)
         if self.instance.pk:
-            existing_sectors = existing_sectors.exclude(pk=self.instance.pk)
+            existing = existing.exclude(pk=self.instance.pk)
 
-        for sector in existing_sectors:
-            other_x_end = sector.x_start + sector.width
-            other_y_end = sector.y_start + sector.height
-
-            if (x_start < other_x_end and
-                    new_x_end > sector.x_start and
-                    y_start < other_y_end and
-                    new_y_end > sector.y_start):
+        for other in existing:
+            if not other.polygon_coords:
+                continue
+            other_poly = Polygon(other.polygon_coords)
+            if not other_poly.is_valid:
+                continue
+            if new_poly.intersects(other_poly) and not new_poly.touches(other_poly):
                 raise forms.ValidationError(
-                    f"Помилка розміщення! Ця ділянка перетинається з існуючою ділянкою «{sector.name}»."
+                    f"Помилка розміщення! Ця ділянка перетинається з існуючою ділянкою «{other.name}»."
                 )
 
         return cleaned_data
 
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.polygon_coords = self.cleaned_data['polygon_coords']
+        if commit:
+            instance.save()
+        return instance
+
     class Meta:
         model = Sector
-        fields = ['name', 'crop', 'x_start', 'y_start', 'width', 'height']
+        fields = ['name', 'crop', 'polygon_coords']
 
         widgets = {
             'name': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Наприклад: Сектор А-1'
             }),
-            'x_start': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1', 'min': '0', 'max': '100'}),
-            'y_start': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1', 'min': '0', 'max': '100'}),
-            'width': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1', 'min': '0', 'max': '100'}),
-            'height': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1', 'min': '0', 'max': '100'}),
         }
 
         error_messages = {
@@ -250,22 +271,6 @@ class SectorCreateForm(forms.ModelForm):
                 'required': "Будь ласка, введіть назву ділянки.",
                 'max_length': "Назва занадто довга (максимум 50 символів).",
             },
-            'x_start': {
-                'required': "Вкажіть початкову координату X.",
-                'invalid': "Введіть коректне число."
-            },
-            'y_start': {
-                'required': "Вкажіть початкову координату Y.",
-                'invalid': "Введіть коректне число."
-            },
-            'width': {
-                'required': "Вкажіть ширину ділянки.",
-                'invalid': "Введіть коректне число."
-            },
-            'height': {
-                'required': "Вкажіть висоту ділянки.",
-                'invalid': "Введіть коректне число."
-            }
         }
 
 class SectorUpdateForm(SectorCreateForm):

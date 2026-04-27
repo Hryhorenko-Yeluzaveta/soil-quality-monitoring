@@ -17,6 +17,12 @@
         <form method="post" class="sensor-form" novalidate>
             {% csrf_token %}
 
+            {% if form.non_field_errors %}
+                <div class="error-message" style="margin-bottom: 15px">
+                    {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+                </div>
+            {% endif %}
+
             <div class="main-info-inputs">
 
                 <div class="form-row">
@@ -67,33 +73,21 @@
                         {% endfor %}
                     </div>
                 </div>
+            </div>
 
-                <div class="internal-divider">Координати на мапі</div>
+            <div class="sensor-placement-block">
+                <h3 class="placement-title">Розташування на мапі</h3>
 
-                <div class="form-row two-cols">
-                    <div class="form-group">
-                        <label for="{{ form.offset_x.id_for_label }}">Позиція по осі X</label>
-                        <div class="input-with-addon">
-                            {{ form.offset_x }}
-                            <span class="addon">%</span>
-                        </div>
-                        {% for error in form.offset_x.errors %}
-                            <div class="error-message">{{ error }}</div>
-                        {% endfor %}
+                {{ form.offset_x }}{{ form.offset_y }}
+
+                {% if form.offset_x.errors or form.offset_y.errors %}
+                    <div class="error-message" style="margin-bottom: 10px">
+                        {% for error in form.offset_x.errors %}<p>{{ error }}</p>{% endfor %}
+                        {% for error in form.offset_y.errors %}<p>{{ error }}</p>{% endfor %}
                     </div>
+                {% endif %}
 
-                    <div class="form-group">
-                        <label for="{{ form.offset_y.id_for_label }}">Позиція по осі Y</label>
-                        <div class="input-with-addon">
-                            {{ form.offset_y }}
-                            <span class="addon">%</span>
-                        </div>
-                        {% for error in form.offset_y.errors %}
-                            <div class="error-message">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-                </div>
-
+                {% include 'components/farm_map.html' with mode='place_sensor' sectors=sectors form=form %}
             </div>
 
             <div class="form-actions">

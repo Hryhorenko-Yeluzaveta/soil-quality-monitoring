@@ -47,57 +47,14 @@
             </div>
         </div>
 
-        <h3 class="section-title">Координати (заповнюються з мапи)</h3>
+        <h3 class="section-title">Намалюйте сектор на мапі</h3>
 
         <div style="margin-bottom: 24px;">
-            {% include 'components/farm_map.html' with is_interactive=True sectors=sectors form=form %}
-        </div>
-
-        <div class="params-grid">
-            <div class="param-card">
-                <div class="param-header">
-                    <i class="ri-map-pin-line icon"></i> Координати
-                </div>
-                <div class="range-inputs">
-                    <div class="input-col">
-                        <label for="{{ form.x_start.id_for_label }}">X (%)</label>
-                        {{ form.x_start }}
-                        {% for error in form.x_start.errors %}
-                            <div class="error-message">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-                    <span class="separator">/</span>
-                    <div class="input-col">
-                        <label for="{{ form.y_start.id_for_label }}">Y (%)</label>
-                        {{ form.y_start }}
-                        {% for error in form.y_start.errors %}
-                            <div class="error-message">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-            <div class="param-card">
-                <div class="param-header">
-                    <i class="ri-shape-2-line icon"></i> Розміри
-                </div>
-                <div class="range-inputs">
-                    <div class="input-col">
-                        <label for="{{ form.width.id_for_label }}">Шир. (%)</label>
-                        {{ form.width }}
-                        {% for error in form.width.errors %}
-                            <div class="error-message">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-                    <span class="separator">x</span>
-                    <div class="input-col">
-                        <label for="{{ form.height.id_for_label }}">Вис. (%)</label>
-                        {{ form.height }}
-                        {% for error in form.height.errors %}
-                            <div class="error-message">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
+            {{ form.polygon_coords }}
+            {% for error in form.polygon_coords.errors %}
+                <div class="error-message" style="margin-bottom: 10px">{{ error }}</div>
+            {% endfor %}
+            {% include 'components/farm_map.html' with mode='draw_sector' sectors=sectors form=form %}
         </div>
 
         <div class="form-actions" style="margin-top: 24px;">

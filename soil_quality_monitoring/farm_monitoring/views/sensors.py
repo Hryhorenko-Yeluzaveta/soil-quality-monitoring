@@ -5,6 +5,7 @@ from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from farm_monitoring.forms import SensorCreateForm, SensorUpdateForm
 
 from farm_monitoring.models import Sensor
+from farm_monitoring.views.sectors import get_annotated_sectors
 from farm_monitoring.views.users import AdminRequiredMixin
 
 
@@ -53,11 +54,21 @@ class SensorCreateView(AdminRequiredMixin, CreateView):
     form_class = SensorCreateForm
     success_url = reverse_lazy("sensors")
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['sectors'] = get_annotated_sectors()
+        return context
+
 class SensorUpdateView(AdminRequiredMixin, UpdateView):
     template_name = 'sensor_create_update.html'
     queryset = Sensor.objects.filter(archived=False)
     form_class = SensorUpdateForm
     success_url = reverse_lazy("sensors")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['sectors'] = get_annotated_sectors()
+        return context
 
 class SensorDeleteView(AdminRequiredMixin, DeleteView):
     model = Sensor

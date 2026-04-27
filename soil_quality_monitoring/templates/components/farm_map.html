@@ -1,12 +1,34 @@
+{% load static %}
+
 <div class="map-section">
-    {% if is_interactive %}
-        <p class="hint-text mb-2" style="margin-bottom: 10px; font-weight: 500; color: #616657;">
-            <i class="ri-drag-move-2-line"></i> Намалюйте сектор прямо на мапі або введіть дані вручну:
+    {% if mode == 'draw_sector' %}
+        <div class="drawing-status">
+            <span class="drawing-counter">
+                <i class="ri-map-pin-line"></i> Точок: <strong id="vertices-counter">0</strong>
+            </span>
+            <button type="button" id="reset-drawing-btn" class="btn-secondary-small">
+                <i class="ri-restart-line"></i> Перемалювати
+            </button>
+        </div>
+        <p class="hint-text drawing-hint">
+            Клікайте на мапі щоб додати точку. <strong>Двічі клікніть</strong> або натисніть на першу точку щоб завершити.
+            <kbd>Backspace</kbd> — видалити останню. <kbd>Esc</kbd> — скинути.
         </p>
+    {% elif mode == 'place_sensor' %}
+        {% if sectors %}
+            <p class="hint-text drawing-hint" id="placement-hint">
+                <i class="ri-cursor-line"></i> Натисніть на мапі всередині будь-якого сектора — він автоматично обереться.
+            </p>
+        {% else %}
+            <div class="empty-map-warning">
+                <i class="ri-error-warning-line"></i>
+                <span>Немає жодного сектора. Спершу <a href="{% url 'sector_create' %}">створіть сектор</a>, потім додайте сенсор.</span>
+            </div>
+        {% endif %}
     {% endif %}
 
-    <div class="farm-map-canvas {% if farm_map_bg_url %}has-bg{% endif %}" id="farmMap"
-         {% if is_interactive %}style="cursor: crosshair; touch-action: none;"{% endif %}>
+    <div class="farm-map-canvas {% if farm_map_bg_url %}has-bg{% endif %} mode-{{ mode|default:'view' }}"
+         id="farmMap">
         {% if farm_map_bg_url %}
             <img class="farm-map-bg" src="{{ farm_map_bg_url }}"
                  alt="Супутниковий знімок поля ферми"
@@ -14,62 +36,80 @@
         {% endif %}
         <div class="canvas-grid"></div>
 
-        {% if not sectors and not is_interactive %}
+        <svg class="farm-overlay" viewBox="0 0 100 100" preserveAspectRatio="none"
+             xmlns="http://www.w3.org/2000/svg">
+            {% for sector in sectors %}
+                {% if sector.polygon_coords %}
+                    <polygon class="farm-sector {% if sector.is_critical %}critical{% endif %}"
+                             points="{% for p in sector.polygon_coords %}{{ p.0|stringformat:'s' }},{{ p.1|stringformat:'s' }} {% endfor %}"
+                             vector-effect="non-scaling-stroke"
+                             data-id="{{ sector.id }}"
+                             data-name="{{ sector.name }}"
+                             {% if mode == 'view' %}
+                             data-crop="{% if sector.crop %}{{ sector.crop.name }}{% else %}Не засіяно{% endif %}"
+                             data-status="{% if sector.is_critical %}Критичний{% else %}В нормі{% endif %}"
+                             data-sensors-count="{{ sector.sensors.count|default:'0' }}"
+                             data-sensors-info='[
+                                {% for sensor in sector.sensors.all %}
+                                    {
+                                        "serial": "{{ sensor.serial_number }}",
+                                        "type": "{{ sensor.get_type_display }}",
+                                        "latest_value": "{{ sensor.latest_value|default:'—' }}",
+                                        "unit": "{{ sensor.unit }}",
+                                        "is_critical": {{ sensor.is_critical|yesno:"true,false" }}
+                                    }{% if not forloop.last %},{% endif %}
+                                {% endfor %}
+                             ]'
+                             {% endif %} />
+                {% endif %}
+            {% endfor %}
+
+            {% if mode == 'draw_sector' %}
+                <polyline class="ghost-line" points="" />
+                <polygon class="ghost-polygon" points="" />
+                <g class="ghost-vertices"></g>
+            {% endif %}
+        </svg>
+
+        {% if mode == 'view' %}
+            {% for sector in sectors %}
+                {% if sector.polygon_coords %}
+                    <span class="sector-label-overlay"
+                          style="left: {{ sector.label_x|stringformat:'s' }}%; top: {{ sector.label_y|stringformat:'s' }}%;">
+                        {{ sector.name }}
+                    </span>
+                {% endif %}
+            {% endfor %}
+
+            {% for sector in sectors %}
+                {% for sensor in sector.sensors.all %}
+                    <div class="sensor-pin {% if sensor.is_critical %}critical{% elif not sensor.is_active %}inactive{% endif %}"
+                         style="left: {{ sensor.offset_x|stringformat:'s' }}%; top: {{ sensor.offset_y|stringformat:'s' }}%;"
+                         data-type="{{ sensor.get_type_display }}"
+                         data-serial="{{ sensor.serial_number }}"
+                         data-value="{{ sensor.latest_value|default:'—' }} {{ sensor.unit }}"
+                         data-status="{% if sensor.is_critical %}Критичний{% elif not sensor.is_active %}Вимкнений{% else %}В нормі{% endif %}">
+                        <i class="ri-sensor-line"></i>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+        {% endif %}
+
+        {% if mode == 'place_sensor' %}
+            <div class="ghost-pin" id="ghost-pin" style="display:none;">
+                <i class="ri-sensor-line"></i>
+            </div>
+        {% endif %}
+
+        {% if not sectors and mode == 'view' %}
             <div class="canvas-placeholder-text">
                 <span>Тут будуть відображатися ваші сектори. Додайте перший!</span>
             </div>
         {% endif %}
-
-        {% for sector in sectors %}
-            <div class="farm-sector {% if not is_interactive and sector.is_critical %}critical{% endif %}"
-                 style="left: {{ sector.x_start|stringformat:'s' }}%;
-                        top: {{ sector.y_start|stringformat:'s' }}%;
-                        width: {{ sector.width|stringformat:'s' }}%;
-                        height: {{ sector.height|stringformat:'s' }}%;
-                        {% if is_interactive %}opacity: 0.4; pointer-events: none; border-style: dashed;{% endif %}"
-                 {% if not is_interactive %}
-                 data-id="{{ sector.id }}"
-                 data-name="{{ sector.name }}"
-                 data-crop="{% if sector.crop %}{{ sector.crop.name }}{% else %}Не засіяно{% endif %}"
-                 data-status="{% if sector.is_critical %}Критичний{% else %}В нормі{% endif %}"
-                 data-sensors-count="{{ sector.sensors.count|default:'0' }}"
-                 data-sensors-info='[
-                    {% for sensor in sector.sensors.all %}
-                        {
-                            "serial": "{{ sensor.serial_number }}",
-                            "type": "{{ sensor.get_type_display }}",
-                            "latest_value": "{{ sensor.latest_value|default:'—' }}",
-                            "unit": "{{ sensor.unit }}",
-                            "is_critical": {{ sensor.is_critical|yesno:"true,false" }}
-                        }{% if not forloop.last %},{% endif %}
-                    {% endfor %}
-                 ]'
-                 {% endif %}>
-
-                <span class="sector-label">{{ sector.name }}</span>
-
-                {% if not is_interactive %}
-                    {% for sensor in sector.sensors.all %}
-                        <div class="sensor-pin {% if sensor.is_critical %}critical{% elif not sensor.is_active %}inactive{% endif %}"
-                             style="left: {{ sensor.offset_x|stringformat:'s' }}%; top: {{ sensor.offset_y|stringformat:'s' }}%;"
-                             data-type="{{ sensor.get_type_display }}"
-                             data-serial="{{ sensor.serial_number }}"
-                             data-value="{{ sensor.latest_value|default:'—' }} {{ sensor.unit }}"
-                             data-status="{% if sensor.is_critical %}Критичний{% elif not sensor.is_active %}Вимкнений{% else %}В нормі{% endif %}">
-                            <i class="ri-sensor-line"></i>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            </div>
-        {% endfor %}
-
-        {% if is_interactive %}
-            <div id="ghost-sector" class="ghost-sector"></div>
-        {% endif %}
     </div>
 </div>
 
-{% if not is_interactive %}
+{% if mode == 'view' %}
     <div id="sensor-tooltip" class="sector-tooltip">
         <div class="tooltip-header">
             <h4 id="tt-sensor-type">Тип сенсора</h4>
@@ -80,9 +120,7 @@
             <p><i class="ri-dashboard-3-line"></i> Значення: <strong id="tt-sensor-value"></strong></p>
         </div>
     </div>
-{% endif %}
 
-{% if not is_interactive %}
     <div id="sector-modal-overlay" class="modal-overlay">
         <div class="sector-modal">
             <div class="modal-header">
@@ -118,11 +156,22 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        const isInteractive = {{ is_interactive|yesno:"true,false" }};
+        const MODE = "{{ mode|default:'view' }}";
         const canvas = document.getElementById('farmMap');
+        const svg = canvas.querySelector('.farm-overlay');
 
-        if (!isInteractive) {
-            const sectors = document.querySelectorAll('.farm-sector');
+        function pctFromEvent(e) {
+            const rect = canvas.getBoundingClientRect();
+            const cx = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+            const cy = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+            return {
+                x: Math.max(0, Math.min(100, (cx / rect.width) * 100)),
+                y: Math.max(0, Math.min(100, (cy / rect.height) * 100)),
+            };
+        }
+
+        if (MODE === 'view') {
+            const sectors = svg ? svg.querySelectorAll('polygon.farm-sector') : [];
             const sensorPins = document.querySelectorAll('.sensor-pin');
             const tooltip = document.getElementById('sensor-tooltip');
             const modalOverlay = document.getElementById('sector-modal-overlay');
@@ -145,7 +194,7 @@
             let currentOpenSectorId = null;
 
             sensorPins.forEach(pin => {
-                pin.addEventListener('mouseenter', function (e) {
+                pin.addEventListener('mouseenter', function () {
                     ttType.textContent = this.getAttribute('data-type');
                     ttSerial.textContent = this.getAttribute('data-serial');
                     ttValue.textContent = this.getAttribute('data-value');
@@ -171,36 +220,30 @@
                 });
 
                 pin.addEventListener('mousemove', function (e) {
-                    const xOffset = 15;
-                    const yOffset = 15;
+                    const xOffset = 15, yOffset = 15;
                     let x = e.clientX + xOffset;
                     let y = e.clientY + yOffset;
                     const rect = tooltip.getBoundingClientRect();
-
                     if (x + rect.width > window.innerWidth) x = e.clientX - rect.width - xOffset;
                     if (y + rect.height > window.innerHeight) y = e.clientY - rect.height - yOffset;
-
                     tooltip.style.left = x + 'px';
                     tooltip.style.top = y + 'px';
                 });
 
                 pin.addEventListener('mouseleave', () => tooltip.classList.remove('show'));
-
-                pin.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                });
+                pin.addEventListener('click', e => e.stopPropagation());
             });
 
-            function openModal(sectorElem) {
-                const sectorId = sectorElem.getAttribute('data-id');
+            function openModal(polygonElem) {
+                const sectorId = polygonElem.getAttribute('data-id');
                 currentOpenSectorId = sectorId;
-                const isCritical = sectorElem.classList.contains('critical');
+                const isCritical = polygonElem.classList.contains('critical');
 
-                mName.textContent = sectorElem.getAttribute('data-name');
-                mCrop.textContent = sectorElem.getAttribute('data-crop');
-                mSensorsCount.textContent = sectorElem.getAttribute('data-sensors-count');
+                mName.textContent = polygonElem.getAttribute('data-name');
+                mCrop.textContent = polygonElem.getAttribute('data-crop');
+                mSensorsCount.textContent = polygonElem.getAttribute('data-sensors-count');
 
-                mStatus.textContent = sectorElem.getAttribute('data-status');
+                mStatus.textContent = polygonElem.getAttribute('data-status');
                 if (isCritical) {
                     mStatus.className = 'status-badge critical-badge';
                 } else {
@@ -210,9 +253,8 @@
                 }
 
                 try {
-                    const sensorsInfo = JSON.parse(sectorElem.getAttribute('data-sensors-info') || '[]');
+                    const sensorsInfo = JSON.parse(polygonElem.getAttribute('data-sensors-info') || '[]');
                     mSensorsList.innerHTML = '';
-
                     if (sensorsInfo.length === 0) {
                         mSensorsList.innerHTML = '<p class="no-sensors">У цьому секторі ще немає встановлених сенсорів.</p>';
                     } else {
@@ -243,11 +285,13 @@
 
                 if (mEditBtn && mDeleteBtn) {
                     mEditBtn.href = `/sectors/update/${sectorId}`;
-                    mDeleteBtn.onclick = function(e) {
+                    mDeleteBtn.onclick = function (e) {
                         e.preventDefault();
                         closeModal();
-                        const sectorName = sectorElem.getAttribute('data-name');
-                        openDeleteModal(`/sectors/delete/${sectorId}`, sectorName);
+                        const sectorName = polygonElem.getAttribute('data-name');
+                        if (typeof openDeleteModal === 'function') {
+                            openDeleteModal(`/sectors/delete/${sectorId}`, sectorName);
+                        }
                     };
                 }
 
@@ -260,92 +304,71 @@
                 currentOpenSectorId = null;
             }
 
-            sectors.forEach(sector => {
-                sector.addEventListener('click', function (e) {
-                    openModal(this);
-                });
-            });
-
+            sectors.forEach(p => p.addEventListener('click', function () { openModal(this); }));
             closeBtn.addEventListener('click', closeModal);
-            modalOverlay.addEventListener('click', function (e) {
-                if (e.target === modalOverlay) closeModal();
-            });
+            modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) closeModal(); });
 
             async function fetchRealTimeData() {
                 try {
                     const response = await fetch('/api/sectors/realtime/');
                     if (!response.ok) return;
-
                     const data = await response.json();
 
                     data.sectors.forEach(serverSector => {
-                        const sectorElement = document.querySelector(`.farm-sector[data-id="${serverSector.id}"]`);
+                        const polygonEl = svg.querySelector(`polygon.farm-sector[data-id="${serverSector.id}"]`);
+                        if (!polygonEl) return;
 
-                        if (sectorElement) {
-                            if (serverSector.is_critical) {
-                                sectorElement.classList.add('critical');
+                        polygonEl.classList.toggle('critical', serverSector.is_critical);
+                        polygonEl.setAttribute('data-status', serverSector.status_text);
+                        polygonEl.setAttribute('data-sensors-info', JSON.stringify(serverSector.sensors_info));
+
+                        serverSector.sensors_info.forEach(sensor => {
+                            const pin = document.querySelector(`.sensor-pin[data-serial="${sensor.serial}"]`);
+                            if (!pin) return;
+                            if (sensor.is_critical) {
+                                pin.classList.add('critical');
+                                pin.classList.remove('inactive');
+                                pin.setAttribute('data-status', 'Критичний');
+                            } else if (!sensor.is_active) {
+                                pin.classList.add('inactive');
+                                pin.classList.remove('critical');
+                                pin.setAttribute('data-status', 'Вимкнений');
                             } else {
-                                sectorElement.classList.remove('critical');
+                                pin.classList.remove('critical', 'inactive');
+                                pin.setAttribute('data-status', 'В нормі');
                             }
+                            const valDisplay = sensor.latest_value !== '—' ? `${sensor.latest_value} ${sensor.unit}` : '—';
+                            pin.setAttribute('data-value', valDisplay);
+                        });
 
-                            sectorElement.setAttribute('data-status', serverSector.status_text);
-                            sectorElement.setAttribute('data-sensors-info', JSON.stringify(serverSector.sensors_info));
+                        if (currentOpenSectorId === String(serverSector.id) && modalOverlay.classList.contains('active')) {
+                            mStatus.textContent = serverSector.status_text;
+                            mStatus.className = serverSector.is_critical ? 'status-badge critical-badge' : 'status-badge';
+                            if (!serverSector.is_critical) { mStatus.style.background = ''; mStatus.style.color = ''; }
 
-                            serverSector.sensors_info.forEach(sensor => {
-                                const pin = sectorElement.querySelector(`.sensor-pin[data-serial="${sensor.serial}"]`);
-                                if (pin) {
-                                    if (sensor.is_critical) {
-                                        pin.classList.add('critical');
-                                        pin.classList.remove('inactive');
-                                        pin.setAttribute('data-status', 'Критичний');
-                                    } else if (!sensor.is_active) {
-                                        pin.classList.add('inactive');
-                                        pin.classList.remove('critical');
-                                        pin.setAttribute('data-status', 'Вимкнений');
-                                    } else {
-                                        pin.classList.remove('critical', 'inactive');
-                                        pin.setAttribute('data-status', 'В нормі');
-                                    }
-                                    const valDisplay = sensor.latest_value !== '—' ? `${sensor.latest_value} ${sensor.unit}` : '—';
-                                    pin.setAttribute('data-value', valDisplay);
-                                }
-                            });
-
-                            if (currentOpenSectorId === String(serverSector.id) && modalOverlay.classList.contains('active')) {
-
-                                mStatus.textContent = serverSector.status_text;
-                                if (serverSector.is_critical) {
-                                    mStatus.className = 'status-badge critical-badge';
-                                    mStatus.style.background = ''; mStatus.style.color = '';
-                                } else {
-                                    mStatus.className = 'status-badge';
-                                }
-
-                                mSensorsList.innerHTML = '';
-                                if (serverSector.sensors_info.length === 0) {
-                                    mSensorsList.innerHTML = '<p class="no-sensors">У цьому секторі ще немає встановлених сенсорів.</p>';
-                                } else {
-                                    serverSector.sensors_info.forEach(sensor => {
-                                        const iconClass = sensor.is_critical ? 'ri-error-warning-line text-danger' : 'ri-checkbox-circle-line text-success';
-                                        const itemClass = sensor.is_critical ? 'sensor-item critical' : 'sensor-item';
-                                        const valueDisplay = sensor.latest_value !== '—' ? `${sensor.latest_value} ${sensor.unit}` : 'Немає даних';
-
-                                        mSensorsList.innerHTML += `
-                                            <div class="${itemClass}">
-                                                <div class="sensor-info">
-                                                    <i class="${iconClass}"></i>
-                                                    <div>
-                                                        <strong>${sensor.type}</strong>
-                                                        <span>${sensor.serial}</span>
-                                                    </div>
-                                                </div>
-                                                <div class="sensor-value-box ${sensor.is_critical ? 'value-critical' : 'value-normal'}">
-                                                    ${valueDisplay}
+                            mSensorsList.innerHTML = '';
+                            if (serverSector.sensors_info.length === 0) {
+                                mSensorsList.innerHTML = '<p class="no-sensors">У цьому секторі ще немає встановлених сенсорів.</p>';
+                            } else {
+                                serverSector.sensors_info.forEach(sensor => {
+                                    const iconClass = sensor.is_critical ? 'ri-error-warning-line text-danger' : 'ri-checkbox-circle-line text-success';
+                                    const itemClass = sensor.is_critical ? 'sensor-item critical' : 'sensor-item';
+                                    const valueDisplay = sensor.latest_value !== '—' ? `${sensor.latest_value} ${sensor.unit}` : 'Немає даних';
+                                    mSensorsList.innerHTML += `
+                                        <div class="${itemClass}">
+                                            <div class="sensor-info">
+                                                <i class="${iconClass}"></i>
+                                                <div>
+                                                    <strong>${sensor.type}</strong>
+                                                    <span>${sensor.serial}</span>
                                                 </div>
                                             </div>
-                                        `;
-                                    });
-                                }
+                                            <div class="sensor-value-box ${sensor.is_critical ? 'value-critical' : 'value-normal'}">
+                                                ${valueDisplay}
+                                            </div>
+                                        </div>
+                                    `;
+                                });
                             }
                         }
                     });
@@ -355,120 +378,275 @@
             }
 
             setInterval(fetchRealTimeData, 30000);
+            return;
         }
 
-        if (isInteractive) {
-            const ghost = document.getElementById('ghost-sector');
-            const inputX = document.getElementById('{{ form.x_start.id_for_label|default:"id_x_start" }}');
-            const inputY = document.getElementById('{{ form.y_start.id_for_label|default:"id_y_start" }}');
-            const inputW = document.getElementById('{{ form.width.id_for_label|default:"id_width" }}');
-            const inputH = document.getElementById('{{ form.height.id_for_label|default:"id_height" }}');
+        if (MODE === 'draw_sector') {
+            const SVG_NS = 'http://www.w3.org/2000/svg';
+            const ghostLine = svg.querySelector('polyline.ghost-line');
+            const ghostPoly = svg.querySelector('polygon.ghost-polygon');
+            const ghostVerticesGroup = svg.querySelector('.ghost-vertices');
+            const hiddenInput = document.getElementById('id_polygon_coords');
+            const counterEl = document.getElementById('vertices-counter');
+            const resetBtn = document.getElementById('reset-drawing-btn');
 
-            if (inputX && inputX.value && inputY.value) {
-                ghost.style.left = inputX.value + '%';
-                ghost.style.top = inputY.value + '%';
-                ghost.style.width = inputW.value + '%';
-                ghost.style.height = inputH.value + '%';
-                ghost.style.display = 'block';
-            }
+            const CLOSE_THRESHOLD = 3.5;
+            let vertices = [];
+            let finished = false;
+            let cursor = null;
 
-            function updateGhostFromInputs() {
-                const x = parseFloat(inputX.value) || 0;
-                const y = parseFloat(inputY.value) || 0;
-                const w = parseFloat(inputW.value) || 0;
-                const h = parseFloat(inputH.value) || 0;
-
-                if (w > 0 && h > 0) {
-                    ghost.style.left = x + '%';
-                    ghost.style.top = y + '%';
-                    ghost.style.width = w + '%';
-                    ghost.style.height = h + '%';
-                    ghost.style.display = 'block';
-                } else {
-                    ghost.style.display = 'none';
+            try {
+                if (hiddenInput && hiddenInput.value) {
+                    const initial = JSON.parse(hiddenInput.value);
+                    if (Array.isArray(initial) && initial.length >= 3) {
+                        vertices = initial.map(p => [Number(p[0]), Number(p[1])]);
+                        finished = true;
+                    }
                 }
+            } catch (e) { vertices = []; finished = false; }
+
+            function updateCounter() {
+                if (counterEl) counterEl.textContent = vertices.length;
             }
 
-            if (inputX && inputY && inputW && inputH) {
-                inputX.addEventListener('input', updateGhostFromInputs);
-                inputY.addEventListener('input', updateGhostFromInputs);
-                inputW.addEventListener('input', updateGhostFromInputs);
-                inputH.addEventListener('input', updateGhostFromInputs);
+            function clearVertexHandles() {
+                while (ghostVerticesGroup.firstChild) ghostVerticesGroup.removeChild(ghostVerticesGroup.firstChild);
             }
 
-            let isDrawing = false;
-            let startX = 0, startY = 0;
-
-            function getPointerPos(e) {
-                const rect = canvas.getBoundingClientRect();
-                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                return {x: clientX - rect.left, y: clientY - rect.top, w: rect.width, h: rect.height};
+            function pointsAttr(points) {
+                return points.map(p => `${p[0]},${p[1]}`).join(' ');
             }
 
-            function startDraw(e) {
-                isDrawing = true;
-                const pos = getPointerPos(e);
-                startX = pos.x;
-                startY = pos.y;
-                ghost.style.left = startX + 'px';
-                ghost.style.top = startY + 'px';
-                ghost.style.width = '0px';
-                ghost.style.height = '0px';
-                ghost.style.display = 'block';
-            }
+            function redraw() {
+                clearVertexHandles();
+                updateCounter();
 
-            function draw(e) {
-                if (!isDrawing) return;
-                e.preventDefault();
-                const pos = getPointerPos(e);
-
-                const currentX = Math.max(0, Math.min(pos.x, pos.w));
-                const currentY = Math.max(0, Math.min(pos.y, pos.h));
-
-                const width = Math.abs(currentX - startX);
-                const height = Math.abs(currentY - startY);
-                const left = Math.min(currentX, startX);
-                const top = Math.min(currentY, startY);
-
-                ghost.style.left = left + 'px';
-                ghost.style.top = top + 'px';
-                ghost.style.width = width + 'px';
-                ghost.style.height = height + 'px';
-            }
-
-            function endDraw() {
-                if (!isDrawing) return;
-                isDrawing = false;
-
-                const rect = canvas.getBoundingClientRect();
-                const widthPx = parseFloat(ghost.style.width);
-                const heightPx = parseFloat(ghost.style.height);
-
-                if (widthPx < 10 || heightPx < 10) {
-                    ghost.style.display = 'none';
+                if (vertices.length === 0) {
+                    ghostLine.setAttribute('points', '');
+                    ghostPoly.setAttribute('points', '');
                     return;
                 }
 
-                if (inputX && inputY && inputW && inputH) {
-                    inputX.value = ((parseFloat(ghost.style.left) / rect.width) * 100).toFixed(1);
-                    inputY.value = ((parseFloat(ghost.style.top) / rect.height) * 100).toFixed(1);
-                    inputW.value = ((widthPx / rect.width) * 100).toFixed(1);
-                    inputH.value = ((heightPx / rect.height) * 100).toFixed(1);
+                if (finished) {
+                    ghostPoly.setAttribute('points', pointsAttr(vertices));
+                    ghostLine.setAttribute('points', '');
+                } else {
+                    ghostPoly.setAttribute('points', '');
+                    let linePoints = vertices.slice();
+                    if (cursor) linePoints = linePoints.concat([cursor]);
+                    ghostLine.setAttribute('points', pointsAttr(linePoints));
                 }
-                ghost.style.left = inputX.value + '%';
-                ghost.style.top = inputY.value + '%';
-                ghost.style.width = inputW.value + '%';
-                ghost.style.height = inputH.value + '%';
+
+                vertices.forEach((v, i) => {
+                    const c = document.createElementNS(SVG_NS, 'circle');
+                    c.setAttribute('cx', v[0]);
+                    c.setAttribute('cy', v[1]);
+                    c.setAttribute('r', '0.9');
+                    c.setAttribute('vector-effect', 'non-scaling-stroke');
+                    c.setAttribute('class', 'ghost-vertex' + (i === 0 ? ' first' : ''));
+                    ghostVerticesGroup.appendChild(c);
+                });
             }
 
-            canvas.addEventListener('mousedown', startDraw);
-            window.addEventListener('mousemove', draw);
-            window.addEventListener('mouseup', endDraw);
+            function commitToInput() {
+                if (hiddenInput) {
+                    hiddenInput.value = finished && vertices.length >= 3 ? JSON.stringify(vertices) : '';
+                }
+            }
 
-            canvas.addEventListener('touchstart', startDraw, {passive: false});
-            window.addEventListener('touchmove', draw, {passive: false});
-            window.addEventListener('touchend', endDraw);
+            function finishPolygon() {
+                if (vertices.length < 3) return;
+                finished = true;
+                cursor = null;
+                commitToInput();
+                redraw();
+            }
+
+            function resetDrawing() {
+                vertices = [];
+                finished = false;
+                cursor = null;
+                commitToInput();
+                redraw();
+            }
+
+            function distance(a, b) {
+                return Math.hypot(a[0] - b[0], a[1] - b[1]);
+            }
+
+            canvas.addEventListener('click', function (e) {
+                if (e.target.closest('polygon.farm-sector')) return;
+                const {x, y} = pctFromEvent(e);
+
+                if (finished) return;
+
+                if (vertices.length >= 3 && distance(vertices[0], [x, y]) < CLOSE_THRESHOLD) {
+                    finishPolygon();
+                    return;
+                }
+
+                vertices.push([x, y]);
+                redraw();
+            });
+
+            canvas.addEventListener('dblclick', function (e) {
+                e.preventDefault();
+                if (!finished && vertices.length >= 3) finishPolygon();
+            });
+
+            canvas.addEventListener('mousemove', function (e) {
+                if (finished || vertices.length === 0) return;
+                const {x, y} = pctFromEvent(e);
+                cursor = [x, y];
+                redraw();
+            });
+
+            document.addEventListener('keydown', function (e) {
+                if (finished) return;
+                if (e.key === 'Escape') { resetDrawing(); }
+                else if (e.key === 'Backspace' && vertices.length > 0 && !e.target.closest('input,textarea')) {
+                    e.preventDefault();
+                    vertices.pop();
+                    redraw();
+                }
+            });
+
+            if (resetBtn) {
+                resetBtn.addEventListener('click', resetDrawing);
+            }
+
+            redraw();
+            return;
+        }
+
+        if (MODE === 'place_sensor') {
+            const offsetXInput = document.getElementById('id_offset_x');
+            const offsetYInput = document.getElementById('id_offset_y');
+            const sectorSelect = document.querySelector('select[name="sector"]');
+            const ghostPin = document.getElementById('ghost-pin');
+            const hint = document.getElementById('placement-hint');
+            const polygons = svg ? svg.querySelectorAll('polygon.farm-sector') : [];
+
+            const polyData = Array.from(polygons).map(p => {
+                const pts = (p.getAttribute('points') || '').trim().split(/\s+/)
+                    .map(s => s.split(',').map(Number))
+                    .filter(pair => pair.length === 2 && !isNaN(pair[0]) && !isNaN(pair[1]));
+                return {id: p.getAttribute('data-id'), el: p, points: pts};
+            });
+
+            function pointInPolygon(x, y, poly) {
+                let inside = false;
+                for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+                    const xi = poly[i][0], yi = poly[i][1];
+                    const xj = poly[j][0], yj = poly[j][1];
+                    const intersect = ((yi > y) !== (yj > y)) &&
+                        (x < (xj - xi) * (y - yi) / (yj - yi + 1e-12) + xi);
+                    if (intersect) inside = !inside;
+                }
+                return inside;
+            }
+
+            function findSectorAt(x, y) {
+                for (const pd of polyData) {
+                    if (pointInPolygon(x, y, pd.points)) return pd;
+                }
+                return null;
+            }
+
+            function highlightSector(sectorId) {
+                polygons.forEach(p => {
+                    if (!sectorId) {
+                        p.classList.remove('dimmed', 'highlighted');
+                    } else if (p.getAttribute('data-id') === String(sectorId)) {
+                        p.classList.add('highlighted');
+                        p.classList.remove('dimmed');
+                    } else {
+                        p.classList.add('dimmed');
+                        p.classList.remove('highlighted');
+                    }
+                });
+            }
+
+            function setHint(html, type) {
+                if (!hint) return;
+                hint.classList.remove('hint-error', 'hint-success');
+                if (type) hint.classList.add('hint-' + type);
+                hint.innerHTML = html;
+            }
+
+            function showPin(x, y) {
+                if (!ghostPin) return;
+                ghostPin.style.left = x + '%';
+                ghostPin.style.top = y + '%';
+                ghostPin.style.display = 'flex';
+            }
+
+            function hidePin() {
+                if (ghostPin) ghostPin.style.display = 'none';
+            }
+
+            if (offsetXInput && offsetYInput && offsetXInput.value && offsetYInput.value) {
+                const ix = parseFloat(offsetXInput.value);
+                const iy = parseFloat(offsetYInput.value);
+                showPin(ix, iy);
+                if (sectorSelect && sectorSelect.value) highlightSector(sectorSelect.value);
+            } else if (sectorSelect && sectorSelect.value) {
+                highlightSector(sectorSelect.value);
+            }
+
+            if (sectorSelect) {
+                sectorSelect.addEventListener('change', () => {
+                    highlightSector(sectorSelect.value);
+                });
+            }
+
+            canvas.addEventListener('mousemove', function (e) {
+                if (polyData.length === 0) return;
+                const {x, y} = pctFromEvent(e);
+                const hit = findSectorAt(x, y);
+                if (hit) {
+                    canvas.style.cursor = 'crosshair';
+                    polygons.forEach(p => {
+                        if (p === hit.el) {
+                            p.classList.add('hover-target');
+                        } else {
+                            p.classList.remove('hover-target');
+                        }
+                    });
+                } else {
+                    canvas.style.cursor = 'not-allowed';
+                    polygons.forEach(p => p.classList.remove('hover-target'));
+                }
+            });
+
+            canvas.addEventListener('mouseleave', function () {
+                polygons.forEach(p => p.classList.remove('hover-target'));
+            });
+
+            canvas.addEventListener('click', function (e) {
+                if (polyData.length === 0) return;
+                const {x, y} = pctFromEvent(e);
+                const hit = findSectorAt(x, y);
+
+                if (!hit) {
+                    setHint('<i class="ri-error-warning-line"></i> Тут немає сектора. Натисніть всередині однієї з виділених областей.', 'error');
+                    return;
+                }
+
+                if (sectorSelect && sectorSelect.value !== hit.id) {
+                    sectorSelect.value = hit.id;
+                    sectorSelect.dispatchEvent(new Event('change', {bubbles: true}));
+                }
+                highlightSector(hit.id);
+
+                if (offsetXInput) offsetXInput.value = x.toFixed(2);
+                if (offsetYInput) offsetYInput.value = y.toFixed(2);
+                showPin(x, y);
+
+                const sectorName = hit.el.getAttribute('data-name') ||
+                    (sectorSelect ? sectorSelect.options[sectorSelect.selectedIndex].text : 'обраного сектора');
+                setHint('<i class="ri-checkbox-circle-line"></i> Сенсор встановлено в секторі <strong>' + sectorName + '</strong>. Натисніть в іншому місці, щоб перемістити.', 'success');
+            });
         }
     });
 </script>

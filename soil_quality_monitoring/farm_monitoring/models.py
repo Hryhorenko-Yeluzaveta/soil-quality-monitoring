@@ -103,26 +103,20 @@ class Sector(models.Model):
         limit_choices_to = {'archived': False}
     )
     archived = models.BooleanField(default=False, verbose_name="Заархівовано")
-    x_start = models.FloatField(
-        verbose_name="Позиція X",
-        help_text="Зміщення зліва у %",
-        validators=[MinValueValidator(0.0), MaxValueValidator(100.0)]
+    polygon_coords = models.JSONField(
+        verbose_name="Координати полігону",
+        help_text="Список точок [[x, y], ...] у відсотках 0–100 від canvas"
     )
-    y_start = models.FloatField(
-        verbose_name="Позиція Y",
-        help_text="Зміщення зверху у %",
-        validators=[MinValueValidator(0.0), MaxValueValidator(100.0)]
-    )
-    width = models.FloatField(
-        verbose_name="Ширина",
-        help_text="Ширина сектора у %",
-        validators=[MinValueValidator(0.0), MaxValueValidator(100.0)]
-    )
-    height = models.FloatField(
-        verbose_name="Висота",
-        help_text="Висота сектора у %",
-        validators=[MinValueValidator(0.0), MaxValueValidator(100.0)]
-    )
+
+    @property
+    def centroid(self):
+        coords = self.polygon_coords or []
+        if not coords:
+            return (50.0, 50.0)
+        return (
+            sum(p[0] for p in coords) / len(coords),
+            sum(p[1] for p in coords) / len(coords),
+        )
 
     def __str__(self):
         return self.name
