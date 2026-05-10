@@ -1,28 +1,8 @@
 import os
 from django.http import JsonResponse
-import json
-
-from django.views.decorators.csrf import csrf_exempt
 
 from farm_monitoring.models import Measurement, Sensor
 
-@csrf_exempt
-def add_measurement(request):
-    if request.headers.get('X-API-Key') != os.getenv('IOT_API_KEY'):
-        return JsonResponse({"error": "Unauthorized device"}, status=403)
-
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            sensor = Sensor.objects.get(serial_number=data['serial_number'])
-            measurement = Measurement.objects.create(sensor=sensor, value=data['value'])
-            measurement.save()
-            return JsonResponse({'message': 'Measurement added'}, status=201)
-        except Sensor.DoesNotExist:
-            return JsonResponse({"error": "Sensor not found"}, status=404)
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=400)
-    return JsonResponse({"error": "Only POST allowed"}, status=405)
 
 def get_active_sensors(request):
     if request.headers.get('X-API-Key') != os.getenv('IOT_API_KEY'):

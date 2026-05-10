@@ -148,3 +148,9 @@ FARM_MAP_ZOOM = 15
 FARM_MAP_TYPE = 'satellite'
 FARM_MAP_SIZE = (640, 360)
 FARM_MAP_SCALE = 2
+
+MQTT_HOST = os.getenv('MQTT_HOST', '127.0.0.1')
+MQTT_PORT = int(os.getenv('MQTT_PORT', '1883'))
+MQTT_TOPIC_PREFIX = os.getenv('MQTT_TOPIC_PREFIX', 'farm/sensors')
+MQTT_QOS = int(os.getenv('MQTT_QOS', '1'))
+MQTT_CLIENT_ID_PREFIX = os.getenv('MQTT_CLIENT_ID_PREFIX', 'smartfarm')

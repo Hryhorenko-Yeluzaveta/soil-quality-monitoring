@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
+from django.utils import timezone
 
 class User(AbstractUser):
     ROLE_ADMIN = 'ADMIN'
@@ -182,7 +183,7 @@ class Sensor(models.Model):
 class Measurement(models.Model):
     sensor = models.ForeignKey(Sensor, on_delete=models.CASCADE, related_name="measurements")
     value = models.FloatField()
-    timestamp = models.DateTimeField(auto_now_add=True)
+    timestamp = models.DateTimeField(default=timezone.now)
 
     class Meta:
         indexes = [
