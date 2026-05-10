@@ -44,9 +44,12 @@
     </nav>
 
     <div class="sidebar-footer">
-        <a href="{% url 'logout' %}" class="nav-link logout">
-            <i class="ri-logout-box-line"></i>
-            <span>Вийти</span>
-        </a>
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="nav-link logout">
+                <i class="ri-logout-box-line"></i>
+                <span>Вийти</span>
+            </button>
+        </form>
     </div>
 </aside>

@@ -99,6 +99,18 @@
     padding-top: 1rem;
 }
 
+.sidebar-footer form {
+    margin: 0;
+}
+
+.sidebar-footer button.nav-link {
+    width: 100%;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+}
+
 .nav-link.logout:hover {
     color: var(--accent-alert);
     background-color: rgba(178, 92, 64, 0.1);
