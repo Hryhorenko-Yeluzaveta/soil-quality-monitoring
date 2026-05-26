@@ -1,7 +1,6 @@
 services:
   mosquitto:
     image: eclipse-mosquitto:2
-    container_name: smartfarm-mosquitto
     restart: unless-stopped
     ports:
       - "1883:1883"
@@ -9,3 +8,46 @@ services:
       - ./mosquitto/config:/mosquitto/config
       - ./mosquitto/data:/mosquitto/data
       - ./mosquitto/log:/mosquitto/log
+
+  web:
+    build: .
+    restart: unless-stopped
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+             python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./soil_quality_monitoring/media:/app/media
+    env_file:
+      - ./soil_quality_monitoring/.env
+    environment:
+      MQTT_HOST: mosquitto
+      ALLOWED_HOSTS: "localhost 127.0.0.1 web 0.0.0.0"
+
+  listener:
+    build: .
+    restart: unless-stopped
+    command: python manage.py mqtt_listener
+    env_file:
+      - ./soil_quality_monitoring/.env
+    environment:
+      MQTT_HOST: mosquitto
+    depends_on:
+      mosquitto:
+        condition: service_started
+
+  simulator:
+    build: .
+    restart: unless-stopped
+    command: python simulator.py
+    env_file:
+      - ./soil_quality_monitoring/.env
+    environment:
+      MQTT_HOST: mosquitto
+      WEB_BASE_URL: "http://web:8000"
+    depends_on:
+      mosquitto:
+        condition: service_started
+      web:
+        condition: service_started

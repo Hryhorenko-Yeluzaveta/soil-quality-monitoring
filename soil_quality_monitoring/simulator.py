@@ -11,7 +11,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-URL_SENSORS = 'http://127.0.0.1:8000/api/sensors'
+WEB_BASE_URL = os.getenv('WEB_BASE_URL', 'http://127.0.0.1:8000')
+URL_SENSORS = f'{WEB_BASE_URL}/api/sensors'
 HEADERS = {
     'X-API-Key': os.getenv('IOT_API_KEY'),
     'Content-Type': 'application/json',
