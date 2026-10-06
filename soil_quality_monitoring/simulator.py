@@ -24,7 +24,7 @@ MQTT_TOPIC_PREFIX = os.getenv('MQTT_TOPIC_PREFIX', 'farm/sensors')
 MQTT_QOS = int(os.getenv('MQTT_QOS', '1'))
 MQTT_CLIENT_ID = f"{os.getenv('MQTT_CLIENT_ID_PREFIX', 'smartfarm')}-simulator-{uuid.uuid4().hex[:8]}"
 
-PUBLISH_INTERVAL_SECONDS = 60
+PUBLISH_INTERVAL_SECONDS = 15
 RAIN_PROBABILITY = 0.05
 
 ENVIRONMENT = {
@@ -124,9 +124,8 @@ def generate_measurement_nitrogen(client):
     for sn in nit_sensors:
         if sn not in nit_states:
             nit_states[sn] = get_start_value(nit_states.values(), 45.0)
-        nit_states[sn] -= random.uniform(0.5, 1)
-        if nit_states[sn] < 0.0:
-            nit_states[sn] = 0.0
+        nit_states[sn] += random.uniform(-2.0, 2.0)
+        nit_states[sn] = max(10.0, min(80.0, nit_states[sn]))
         publish_measurement(client, sn, nit_states[sn])
 
 
